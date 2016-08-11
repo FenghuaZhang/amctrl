@@ -1,0 +1,13 @@
+/.git/
+/.settings/
+/bin/
+
+/bundle/
+
+/target/
+
+
+.classpath
+.project
+
+
