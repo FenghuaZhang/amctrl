@@ -1,0 +1,187 @@
+module flexbng-device-info {
+  namespace "urn:ietf:params:xml:ns:yang:ietf-address-pool:flexbng:vbras";
+  prefix flexbng-vbras;
+
+  import tailf-xsd-types {
+    prefix xs;
+  }
+
+  import tailf-common {
+    prefix tailf;
+  }
+
+  organization
+  "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
+
+  contact
+  "Editor:  GU Feng
+  <mailto:guf@certusnet.com.cn>
+
+  Editor:   Chen  Li
+  <mailto:lichen@ctbri.com.cn>
+
+  Editor:   Lin Zhu
+  <mailto:zhulin@certusnet.com.cn>";
+
+  description
+  "no";
+
+  revision 2015-11-11 {
+    description
+    "Initial revision.";
+  }
+
+  typedef result-status{
+    type enumeration{
+      enum success {
+        description
+        "The result status is success.";
+      }
+      enum fail {
+        description
+        "The result status is failure.";
+      }
+    }
+    description
+    "Result status.";
+  }
+
+  container controller-netconf-registration {
+    tailf:info "controller register into ama device";
+    leaf device-id {
+      tailf:info "ama device id assigned by app";
+      type uint32;
+      default "0";
+    }
+  }
+
+  notification ama-register-to-controller {
+    leaf device-id {
+      type uint32;
+    }
+  }
+
+  container controller-send-configuration-to-ama {
+    tailf:alt-name ama-pool-config;
+    tailf:info "Controller send configuration to ama";
+    leaf device-keep-alive-interval {
+    tailf:info "heartbeat interval of confd service";
+      type uint32;
+      default "0";
+    }
+    leaf ipv4-address-pool-usage-threshold {
+      tailf:info "IPv4 threshold of pool block usage ratio";
+      type xs:double;
+      default "0";
+    }
+    leaf ipv6-address-pool-usage-threshold {
+      tailf:info "IPv6 threshold of pool block usage ratio";
+      type xs:double;
+      default "0";
+    }
+    leaf state-update-interval {
+      tailf:info "Report interval for pool block status";
+      type uint32;
+      default "0";
+    }
+    leaf device-sampling-interval {
+      tailf:info "Sampling interval for pool block usage ratio";
+      type uint32;
+      default "0";
+    }
+  }
+
+  notification address-pool-status {
+    leaf device-id {
+      type uint32;
+    }
+    leaf time {
+      type uint32;
+    }
+    list address-pool {
+      key address-pool-name;
+      leaf address-pool-name {
+        type string;
+      }
+      leaf address-pool-id {
+        type uint32;
+      }
+      leaf domain-name {
+        type string;
+      }
+      container address-pool-entries {
+        list ipv4-address-block {
+          key ipv4-address-block-name;
+          leaf ipv4-address-block-name {
+            type string;
+          }
+          leaf ipv4-address-block-id {
+            type uint32;
+          }
+          leaf average-address-usage-ratio {
+            type uint32;
+          }
+        }
+        list ipv6-address-block {
+          key ipv6-address-block-name;
+          leaf ipv6-address-block-name {
+            type string;
+          }
+          leaf ipv6-address-block-id {
+            type uint32;
+          }
+          leaf average-address-usage-ratio {
+            type uint32;
+          }
+        }
+      }
+    }
+  }
+
+  grouping ama-report-address-to-controller {
+    leaf device-id {
+      type uint32;
+    }
+    leaf domain-name {
+      type string;
+    }
+    leaf address-pool-id {
+      type uint32;
+    }
+    leaf address-pool-name {
+      type string;
+    }
+    leaf address-block-id {
+      type uint32;
+    }
+    leaf address-block-name {
+      type string;
+    }
+    leaf result {
+      type result-status;
+    }
+  }
+
+  notification ama-report-address-got-to-controller-ipv4 {
+    uses ama-report-address-to-controller;
+  }
+
+  notification ama-report-address-recycled-to-controller-ipv4 {
+    uses ama-report-address-to-controller;
+  }
+
+  notification ama-report-address-got-to-controller-ipv6 {
+    uses ama-report-address-to-controller;
+  }
+
+  notification ama-report-address-recycled-to-controller-ipv6 {
+    uses ama-report-address-to-controller;
+  }
+
+  notification ama-report-heart-beat-to-controller {
+    leaf ama-id {
+      type uint32;
+    }
+  }
+}
+

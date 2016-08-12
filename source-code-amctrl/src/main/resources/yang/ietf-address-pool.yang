@@ -1,0 +1,223 @@
+module ietf-address-pool{
+  namespace "urn:ietf:params:xml:ns:yang:ietf-address-pool";
+  prefix addr-pool;
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-xsd-types {
+    prefix xs;
+  }
+
+  organization
+  "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
+
+  contact
+  "WG Web:   <http://tools.ietf.org/wg/netmod/>
+  WG List:  <mailto:netmod@ietf.org>
+
+  WG Chair: Thomas Nadeau
+  <mailto:tnadeau@lucidvision.com>
+
+  WG Chair: Juergen Schoenwaelder
+  <mailto:j.schoenwaelder@jacobs-university.de>
+
+  Editor:   Qiong Sun
+  <mailto:sunqiong@ctbri.com.cn>
+
+  Editor:   Will(Shucheng) Liu
+  <mailto:liushucheng@huawei.com>";
+
+  description
+  "This module contains a collection of YANG definitions for
+  configuring IP implementations.
+
+  Copyright (c) 2014 IETF Trust and the persons identified as
+  authors of the code.  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or
+  without modification, is permitted pursuant to, and subject
+  to the license terms contained in, the Simplified BSD License
+  set forth in Section 4.c of the IETF Trust's Legal Provisions
+  Relating to IETF Documents
+  (http://trustee.ietf.org/license-info).
+  This version of this YANG module is part of RFC 7277; see
+  the RFC itself for full legal notices.";
+
+  revision 2015-07-17 {
+    description
+    "Initial revision.";
+    reference
+    "RFC 7277: A YANG Data Model for IP Management";
+  }
+
+  container address-pools {
+    tailf:info "Container for Address Pools";
+    tailf:cli-add-mode;
+    description
+    "This is a top level container for Address Pools.
+    It can have one or more Address Pools.";
+    leaf device-id {
+      tailf:info "Device id for address pool allocation";
+      type uint32;
+      default "0";
+    }
+    list address-pool {
+      tailf:info "An Address Pool is an ordered list";
+      key address-pool-name;
+      description
+      "An Address Pool is an ordered list of
+      Address Pool Entries (APE). Each Access Pool Entry has a
+      list of address blocks and its associated lifetime. ";
+
+      leaf address-pool-name {
+        tailf:info "(An Address Pool name) ";
+        type string;
+        description
+        "The name of address pool";
+      }
+
+      leaf address-pool-id {
+        tailf:info "The Address Pool id";
+        type uint32;
+        default "0";
+      }
+
+      leaf domain-name {
+        tailf:info "(The domain name)";
+        type string;
+      }
+
+      choice usergateway {
+        leaf ipv4-usergateway {
+          tailf:info "Used for IPv4 user addressing";
+          type inet:ipv4-address-no-zone;
+        }
+       	  
+        leaf ipv6-usergateway {
+          tailf:info "Used for IPv6 user addressing";
+          type inet:ipv6-address-no-zone;
+        }
+        mandatory true;
+      }
+
+      leaf gwnetmask {
+        tailf:info "The netmask for user gateway";
+        type uint32;
+      }
+      must "gwnetmask != ''" {
+        error-message "The gwnetmask is not configured.";
+      }
+
+      leaf leasing-time {
+        tailf:info "The leasing time with default 3 days";
+        type uint32;
+        default "0";
+      }
+
+      leaf primarydns {
+        tailf:info "The primary DNS info";
+        type string
+        {
+          pattern '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}'
+                + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])';
+        }
+        default "0.0.0.0";
+      }
+
+      leaf secondarydns {
+        tailf:info "The secondary DNS info";
+        type string
+        {
+          pattern '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}'
+       	        + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])';
+        }
+        default "0.0.0.0";
+      }
+
+      container address-pool-entries {
+        tailf:info "Contain a list of address-blocks and associated attributes";
+        description
+        "The address-pool-entries container contains
+        a list of address-blocks and associated attributes.";
+        list ipv4-address-block {
+          tailf:info "IPv4 Address block";
+          key ipv4-address-block-name;
+          unique "ipv4-address-block-id";
+          leaf ipv4-address-block-name {
+            tailf:info "(The name of IPv4 address block) ";
+            type string;
+          }
+          leaf ipv4-address-block-id {
+            tailf:info "The index of IPv4 address block (1~8) ";
+            type uint32;
+            mandatory true;
+          }
+          leaf ipv4-prefix {
+            tailf:info "The IPv4 address prefix";
+            type string
+            {
+                pattern '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}'
+                      + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])';
+            }
+            mandatory true;
+          }
+          leaf ipv4-prefix-length {
+            tailf:info "The IPv4 address prefix length";
+            type uint32
+            {
+                range "1..255";
+            }
+            mandatory true;
+          }
+          leaf time {
+            tailf:info "Address block allocation time";
+            type uint32;
+            default "0";
+          }
+          must "../../ipv4-usergateway != ''" {
+            error-message "The ipv4 block is not match with the usergateway";
+          }
+        }
+        list ipv6-address-block {
+          tailf:info "IPv6 Address block";
+          key ipv6-address-block-name;
+          unique "ipv6-address-block-id";
+          leaf ipv6-address-block-name {
+            tailf:info "(The name of IPv6 address block) ";
+            type string;
+          }
+          leaf ipv6-address-block-id {
+            tailf:info "The index of IPv6 address block (1~8) ";
+            type uint32;
+            mandatory true;
+          }
+          leaf ipv6-prefix {
+            tailf:info "The IPv6 address prefix";
+            type string;
+            mandatory true;
+          }
+          leaf ipv6-prefix-length {
+            tailf:info "The IPv6 address prefix length";
+            type uint32;
+            mandatory true;
+          }
+          leaf time {
+            tailf:info "Address block allocation time";
+            type uint32;
+            default "0";
+          }
+          must "../../ipv6-usergateway != ''" {
+            error-message "The ipv6 block is not match with the usergateway";
+          }
+        }
+      }
+    }
+  }
+}
+
