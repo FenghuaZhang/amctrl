@@ -150,6 +150,7 @@
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/com/chinatele/app/amctrl/util/JsonUtil.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/com/chinatele/app/amctrl/service/dto/AddressBlockIPv6.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/addressPool/tailfCommon/TailfOid.java
+/home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/deviceInfo/flexbngDeviceInfo/AmaReportLackOfAddressBlock.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/addressPool/tailfXsdTypes/Time.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/addressPool/tailfCommon/SnmpIdentifier.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/com/chinatele/app/amctrl/rest/na/RequestAppClient.java

@@ -36,6 +36,7 @@ com/chinatele/app/amctrl/service/dto/DeviceDownNotification.class
 com/chinatele/app/amctrl/service/impl/AddressBlockMessageServiceImpl$2.class
 gen/addressPool/ietfYangTypes/Gauge32.class
 gen/addressPool/tailfXsdTypes/Token.class
+com/chinatele/app/amctrl/util/Constants$Notification.class
 gen/addressPool/ietfYangTypes/DateAndTime.class
 gen/addressPool/ietfAddressPool/addressPools/addressPool/addressPoolEntries/Ipv4AddressBlock.class
 gen/addressPool/tailfCommon/Ipv4AddressAndPrefixLength.class
@@ -92,6 +93,7 @@ gen/addressPool/ietfInetTypes/IpAddressNoZone.class
 gen/addressPool/ietfYangTypes/Uuid.class
 com/chinatele/app/amctrl/service/dto/DeviceDown.class
 gen/addressPool/tailfCommon/Tailf.class
+gen/deviceInfo/flexbngDeviceInfo/AmaReportLackOfAddressBlock.class
 com/chinatele/app/amctrl/rest/vo/request/ReleaseAddrPoolInfo.class
 com/chinatele/app/amctrl/service/dto/AddressPool.class
 com/chinatele/app/amctrl/service/dto/IPv4ConfigConfirmNotification.class
@@ -99,6 +101,7 @@ gen/deviceInfo/tailfCommon/IpAddressAndPrefixLength.class
 gen/addressPool/ietfInetTypes/IpPrefix.class
 gen/addressPool/tailfCommon/Sha512DigestString.class
 com/chinatele/app/amctrl/service/dto/PoolStatus.class
+com/chinatele/app/amctrl/util/Constants$RecycleAddressPool.class
 gen/deviceInfo/tailfXsdTypes/Decimal.class
 gen/addressPool/ietfInetTypes/IpAddress.class
 com/chinatele/app/amctrl/rest/nc/NorthBound.class
