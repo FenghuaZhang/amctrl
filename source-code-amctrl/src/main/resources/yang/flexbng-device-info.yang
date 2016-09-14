@@ -183,5 +183,18 @@ module flexbng-device-info {
       type uint32;
     }
   }
+  
+  notification ama-report-lack-of-address-block {
+    leaf device-id {
+      type uint32;
+    }
+	leaf domain-name {
+	  type string;
+	}
+	leaf protocol-type {
+	  type uint32;
+	  default "1";
+	}
+  }
 }
 

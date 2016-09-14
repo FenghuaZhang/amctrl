@@ -12,6 +12,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -69,6 +71,7 @@ public class NorthBound {
     @Produces(value = MediaType.APPLICATION_JSON)
     @Consumes(value = MediaType.APPLICATION_JSON)
     public Response configController(String requestJson) {
+    	log.info("Start NorthBound::configController with inputted parameters: "+ requestJson);
         ResponseVo vo = null;
         if (!StringUtils.isBlank(requestJson)) {
             log.info(requestJson);
@@ -86,6 +89,7 @@ public class NorthBound {
             throw new AmCtrlException(Constants.RETURN_CODE_LACK_KEY_PARAMETER_ERROR, Constants.LACK_KEY_PARAMETER_ERROR_MESSAGE);
         }
         ObjectNode objectNode = JsonUtil.buildResponse(vo);
+        log.info("End NorthBound::configController with response "+ ReflectionToStringBuilder.toString(vo, ToStringStyle.MULTI_LINE_STYLE));
         return Response.ok(objectNode.toString()).build();
     }
 
@@ -102,20 +106,21 @@ public class NorthBound {
     @Produces(value = MediaType.APPLICATION_JSON)
     @Consumes(value = MediaType.APPLICATION_JSON)
     public Response recycleAddressBlock(String requestJson) {
+    	log.info("Start NorthBound::recycleAddressBlock with inputted parameters: "+ requestJson);
         ResponseVo vo = null;
         if (!StringUtils.isBlank(requestJson)) {
-            log.info(requestJson);
             try {
                 RecycleBlock recycleBlock = JsonUtil.convertToJavaBean(requestJson, RecycleBlock.class);
                 vo = getControllerService().recycleAddress(recycleBlock);
             } catch (Exception e) {
-                log.error("" + e);
+                log.error("RecycleAddress fail exception occured. " + e);
                 throw new AmCtrlException(Constants.RETURN_CODE_PARAMETER_NAME_PARSE_ERROR, Constants.PARAMETER_NAME_PARSE_ERROR_MESSAGE);
             }
         } else {
             throw new AmCtrlException(Constants.RETURN_CODE_LACK_KEY_PARAMETER_ERROR, Constants.LACK_KEY_PARAMETER_ERROR_MESSAGE);
         }
         ObjectNode objectNode = JsonUtil.buildResponse(vo);
+        log.info("End NorthBound::recycleAddressBlock with response "+ ReflectionToStringBuilder.toString(vo, ToStringStyle.MULTI_LINE_STYLE));
         return Response.ok(objectNode.toString()).build();
     }
 
@@ -132,6 +137,7 @@ public class NorthBound {
     @Consumes(value = MediaType.APPLICATION_JSON)
     @Produces(value = MediaType.APPLICATION_JSON)
     public Response getDeviceState(String requestJson) {
+    	log.info("Start NorthBound::getDeviceState with inputted parameters: " + requestJson);
         ResponseVo vo = null;
         if (!StringUtils.isBlank(requestJson)) {
             try{
@@ -146,6 +152,7 @@ public class NorthBound {
             throw new AmCtrlException(Constants.RETURN_CODE_LACK_KEY_PARAMETER_ERROR, Constants.LACK_KEY_PARAMETER_ERROR_MESSAGE);
         }
         ObjectNode objectNode = JsonUtil.buildResponse(vo);
+        log.info("End NorthBound::getDeviceState with response: " + ReflectionToStringBuilder.toString(vo, ToStringStyle.MULTI_LINE_STYLE));
         return Response.ok(objectNode.toString()).build();
     }
 
@@ -154,6 +161,7 @@ public class NorthBound {
     @Consumes(value = MediaType.APPLICATION_JSON)
     @Produces(value = MediaType.APPLICATION_JSON)
     public Response allocateAddressBlock(String requestJson) {
+    	log.info("Start NorthBound::allocateAddressBlock with inputted parameters: " + requestJson);
         ResponseVo vo = null;
         if (!StringUtils.isBlank(requestJson)) {
             log.info(requestJson);
@@ -181,6 +189,7 @@ public class NorthBound {
             throw new AmCtrlException(Constants.RETURN_CODE_LACK_KEY_PARAMETER_ERROR, Constants.LACK_KEY_PARAMETER_ERROR_MESSAGE);
         }
         ObjectNode objectNode = JsonUtil.buildResponse(vo);
+        log.info("End NorthBound::allocateAddressBlock with response: " + ReflectionToStringBuilder.toString(vo, ToStringStyle.MULTI_LINE_STYLE));
         return Response.ok(objectNode.toString()).build();
     }
 
@@ -197,6 +206,7 @@ public class NorthBound {
     @Consumes(value = MediaType.APPLICATION_JSON)
     @Produces(value = MediaType.APPLICATION_JSON)
     public Response forceDeviceDown(String requestJson) {
+    	log.info("Start NorthBound::forceDeviceDown with inputted parameters: " + requestJson);
         ResponseVo vo = null;
         if (!StringUtils.isBlank(requestJson)) {
             try{
@@ -211,11 +221,12 @@ public class NorthBound {
             throw new AmCtrlException(Constants.RETURN_CODE_LACK_KEY_PARAMETER_ERROR, Constants.LACK_KEY_PARAMETER_ERROR_MESSAGE);
         }
         ObjectNode objectNode = JsonUtil.buildResponse(vo);
+        log.info("End NorthBound::forceDeviceDown with response: " + ReflectionToStringBuilder.toString(vo, ToStringStyle.MULTI_LINE_STYLE));
         return Response.ok(objectNode.toString()).build();
     }
     
     /**
-     * 
+     * @deprecated
      * @description APP要求控制器回收指定device的指定地址池
      * @author xiey
      * @param requestJson

@@ -14,6 +14,8 @@ import java.util.Map;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.log4j.Logger;
 import org.springframework.util.StringUtils;
 
@@ -47,12 +49,30 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 
 		try {
 			client.initConn(connCfgInfo.getDevice_ip(),connCfgInfo.getDevice_port(),connCfgInfo.getUserName(),connCfgInfo.getPassword());
+			logger.info("starting register yang model");
 			FlexbngVbras.enable();
 			AddrPool.enable();
 			
 			//订阅notification
+			logger.info("Starting getting msg session");
 	        final NetconfSession msgsession = client.getSession(Client.devices.get(connCfgInfo.getDevice_ip()),"msg"); 
-	        msgsession.createSubscription("address-pool");
+	        if(msgsession != null) {
+				logger.info("Starting subscription address-pool creation for session: "
+						+ ReflectionToStringBuilder.toString(msgsession,
+								ToStringStyle.MULTI_LINE_STYLE));
+	        	try {
+					msgsession.createSubscription("address-pool");
+				} catch (JNCException e) {
+					// TODO Auto-generated catch block
+					logger.error("Subscription creation failed due to exception "
+							+ e.getCause() + ";"
+							+ e.getMessage() + ";"
+							+ e.getStackTrace());
+				}        	
+	        } else {
+	        	logger.error("Cannot create subscription since msg session retrieved is null");
+	        }
+	        logger.info("Finish subscription address-pool creation");
 	        
 	        //一个连接对应一个接收notification的线程
 	        if (notificationThreadMap.get(connCfgInfo.getDevice_ip()) == null){
@@ -77,22 +97,31 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 	        	notificationThreadMap.put(connCfgInfo.getDevice_ip(), thread);
 	        }
 
+	        logger.info("Starting getting cfg session");
 	        NetconfSession session = client.getSession(Client.devices.get(connCfgInfo.getDevice_ip()),"cfg"); 
 	        
+	        logger.info("Starting ama netconf registration");
 	        //用于Controller向AMA发起注册
-	        if (session.getConfig("controller-netconf-registration").size() == 0){
+			if (session.getConfig("controller-netconf-registration") == null
+					|| session.getConfig("controller-netconf-registration").size() == 0) {
+				logger.info("returned config controller-netconf-registration is empty");
 	        	ControllerNetconfRegistration amaDeviceConfig = new ControllerNetconfRegistration();
 	        	amaDeviceConfig.setDeviceIdValue(connCfgInfo.getDevice_id());
 	        	session.editConfig(amaDeviceConfig);
 	        }
 	        else{
-	        	Element deviceConfig = Client.getConfig(session.getConfig("controller-netconf-registration"),"controller-netconf-registration");
+				Element deviceConfig = Client.getConfig(
+						session.getConfig("controller-netconf-registration"),"controller-netconf-registration");
 	        	setElementValue(deviceConfig,"device-id",connCfgInfo.getDevice_id());
 		        session.editConfig(deviceConfig);
 	        }
 	        
+	        logger.info("Starting sending configuration to ama");
 	        //下发配置
-	        if (session.getConfig("controller-send-configuration-to-ama").size() == 0){
+			if (session.getConfig("controller-send-configuration-to-ama") == null
+					|| session.getConfig("controller-send-configuration-to-ama").size() == 0) {
+				logger.info("returned config controller-send-configuration-to-ama is empty");
+				logger.info("connCfgInfo to be sent to ama is " + ReflectionToStringBuilder.toString(connCfgInfo, ToStringStyle.MULTI_LINE_STYLE));
 	        	ControllerSendConfigurationToAma controllerSendConfigurationToAma = new ControllerSendConfigurationToAma();
 	        	controllerSendConfigurationToAma.setDeviceKeepAliveIntervalValue(connCfgInfo.getHeartbeat_interval());
 	        	controllerSendConfigurationToAma.setIpv4AddressPoolUsageThresholdValue(connCfgInfo.getIpv4_threshold()+"");
@@ -100,7 +129,16 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 	        	controllerSendConfigurationToAma.setStateUpdateIntervalValue(connCfgInfo.getState_update_interval());
 	        	controllerSendConfigurationToAma.setDeviceSamplingIntervalValue(connCfgInfo.getDevice_sampling_interval());
 	        	if (session.getConfig().add(controllerSendConfigurationToAma)){
-	        		session.editConfig(controllerSendConfigurationToAma);
+	        		try {
+	        			logger.info("Start editting config controller-send-configuration-to-ama...");
+						session.editConfig(controllerSendConfigurationToAma);
+					} catch (JNCException e) {
+						logger.error("Editting config controller-send-configuration-to-ama exception occurs: "+ e.getCause() + ";" + e.getMessage());
+						disconnectDevice(connCfgInfo.getDevice_ip());
+						return false;
+					}
+	        	} else {
+					logger.info("Config controller-send-configuration-to-ama adding to session failed. ");
 	        	}
 	        }
 	        else{
@@ -114,10 +152,13 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 	        }
 	        
 	        return true;
-		}
-		catch (Exception ex) {
+		} catch(JNCException e){
+			logger.error("JNCException occurs: "+ e.getCause() + ";" + e.getMessage());
+			disconnectDevice(connCfgInfo.getDevice_ip());
+			return false;
+		} catch (Exception ex) {
 		    ex.printStackTrace();
-			logger.error("service.openConnection:"+ex.getMessage());
+			logger.error("service.openConnection: "+ ex.getCause() + ";" + ex.getMessage());
 			disconnectDevice(connCfgInfo.getDevice_ip());
 			return false;
 		}	
@@ -183,18 +224,25 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
         com.chinatele.app.amctrl.rest.vo.request.Device device = map.get(allocateBlock.getDevice_id());
 		
 		try {
+			logger.info("Connecting to device " + device.getDevice_ip()	+ "......");
 			client.init(device.getDevice_ip(),device.getDevice_port(),device.getUsername(),device.getPassword());
 			FlexbngVbras.enable();
 			AddrPool.enable();
+			logger.info("Getting cfg session for device: "
+							+ ReflectionToStringBuilder.toString(Client.devices.get(device.getDevice_ip()),ToStringStyle.MULTI_LINE_STYLE));
 			NetconfSession session = client.getSession(Client.devices.get(device.getDevice_ip()),"cfg");
+			logger.info("After getting cfg session......");
 			
+			logger.info(ReflectionToStringBuilder.toString(session.getConfig("address-pools"), ToStringStyle.MULTI_LINE_STYLE));
+			logger.info("After testing getConfig address-pools");
 			if (session.getConfig("address-pools") == null || session.getConfig("address-pools").size() == 0){
+				logger.info("After getting nulled config address-pools......");
 				AddressPools pools = new AddressPools();
 				pools.setDeviceIdValue(allocateBlock.getDevice_id());
 				//pools.setDomainNameValue(allocateBlock.getDomain_name());
 				//pools.setTimeValue(allocateBlock.getTime()+"");
 				session.getConfig().add(pools);
-				
+				logger.info("After getting all config ......");
 				gen.addressPool.ietfAddressPool.addressPools.AddressPool netconfPool = pools.addAddressPool();
 				netconfPool.setAddressPoolNameValue(allocateBlock.getAddress_pool_name());
 				netconfPool.setAddressPoolIdValue(allocateBlock.getAddress_pool_id());
@@ -213,10 +261,15 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 				}
 				netconfPool.setLeasingTimeValue(allocateBlock.getLeasing_time());
 				netconfPool.addAddressPoolEntries();
+				logger.info("Before editing config address-pools......");
 				session.editConfig(pools);
+				logger.info("After editing config address-pools......");
 			}
 			
+			logger.info("Before getting config address-pools......");
 			Element configuration = Client.getConfig(session.getConfig("address-pools"),"address-pools");
+			logger.info("After getting config address-pools with returned configuration: "
+					+ ReflectionToStringBuilder.toString(configuration,	ToStringStyle.MULTI_LINE_STYLE));
 			
 			boolean matchPool = false;
 			boolean matchBlock = false;
@@ -390,6 +443,11 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 						if (recycleBlock.getAddress_pool_id() != Integer.parseInt(e.getValue("address-pool-id").toString())){
 							logger.info("not matched address pool");
 							continue;
+						} else {
+							if(recycleBlock.getRecycleAddrPool() == Constants.RecycleAddressPool.YES) {
+								e.markDelete();
+								break;
+							}
 						}
 					}
 					
@@ -414,13 +472,13 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 						}
 						if (String.valueOf(recycleBlock.getAddress_block_id()).equals(blockId)){
 							recycleFlag = true;
-							ite.markDelete();
+							ite.markDelete();							
 							break;
 						}
 					}
 				}
 			}
-			if (!recycleFlag){
+			if (recycleBlock.getRecycleAddrPool() == Constants.RecycleAddressPool.NO && !recycleFlag){
 				recyleNotExistList.add(recycleBlock.getAddress_block_id());
 				failedResult.put(String.valueOf(Constants.RECYCLE_ADDRESS_NOT_EXIST), recyleNotExistList);
 				return failedResult;

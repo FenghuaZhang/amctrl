@@ -1,6 +1,7 @@
 package com.chinatele.app.amctrl.rest.na;
 
 import net.sf.json.JSONObject;
+import net.sf.json.xml.XMLSerializer;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -140,7 +141,7 @@ public class RequestAppClient {
             log.error("report address block confirm to app, app return [null]");
         }
     }
-
+    
     public static void reportDeviceDown(DeviceDown deviceDown) throws Exception {
         String appUrl = ConfigUtil.getValue("APP_URL");
         String uri = appUrl + "/controller-report-app-device-down";
@@ -160,4 +161,41 @@ public class RequestAppClient {
             log.error("report device down to app, app return [null]");
         }
     }
+
+	public static void reportBlockLacking(String xmlBlockLacking) throws Exception {
+		String appUrl = ConfigUtil.getValue("APP_URL");
+        String uri = appUrl + "/controller_report_address_lacking";
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        HttpClient httpClient = builder.build();
+        
+        // xml to json handler
+        XMLSerializer xmlSerializer = new XMLSerializer();
+        JSONObject jsonObj = (JSONObject)xmlSerializer.read(xmlBlockLacking);
+        String jsonStr = StringUtils.EMPTY;
+        if (jsonObj.has(Constants.Notification.NOTIFY_ID_OF_AMA_LACK_BLOCK)) {
+        	JSONObject obj = (JSONObject) jsonObj.get(Constants.Notification.NOTIFY_ID_OF_AMA_LACK_BLOCK);
+        	// remove xmlns property
+        	if(obj.has("@xmlns")) {
+        		obj.remove("@xmlns");	
+        	}
+        	jsonStr = obj.toString();        	
+        	log.info("RequestAppClient::reportBlockLacking() JSON after converting from xml is: ", jsonStr);
+        } else {
+        	log.error("Node " + Constants.Notification.NOTIFY_ID_OF_AMA_LACK_BLOCK + " is not found, please check the received notification.");
+        }
+        
+        HttpPost post = new HttpPost(uri);
+        StringEntity entity = new StringEntity(jsonStr, "utf-8");
+        entity.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        post.setEntity(entity);
+        
+        HttpResponse response = httpClient.execute(post);
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+			log.info(
+					"RequestAppClient::reportBlockLacking() report address block lacking to app, app return [{}]",
+					EntityUtils.toString(response.getEntity()));
+        } else {
+            log.error("RequestAppClient::reportBlockLacking() report address block lacking to app, app return [null]");
+        }
+	}
 }

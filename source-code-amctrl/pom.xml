@@ -239,6 +239,7 @@
                             net.sf.ezmorph.object,
                             net.sf.json.regexp,
                             org.apache.commons.lang,
+                            org.apache.commons.lang.builder,
                             ch.ethz.ssh2.*,
                             nu.xom.*,
                             org.xml.sax.helpers,

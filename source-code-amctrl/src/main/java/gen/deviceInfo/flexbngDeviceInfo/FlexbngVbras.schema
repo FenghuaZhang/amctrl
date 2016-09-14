@@ -5,7 +5,7 @@
         <primitive_type>0</primitive_type>
         <min_occurs>1</min_occurs>
         <max_occurs>1</max_occurs>
-        <children>controllerNetconfRegistration amaRegisterToController controllerSendConfigurationToAma addressPoolStatus amaReportAddressGotToControllerIpv4 amaReportAddressRecycledToControllerIpv4 amaReportAddressGotToControllerIpv6 amaReportAddressRecycledToControllerIpv6 amaReportHeartBeatToController</children>
+        <children>controllerNetconfRegistration amaRegisterToController controllerSendConfigurationToAma addressPoolStatus amaReportAddressGotToControllerIpv4 amaReportAddressRecycledToControllerIpv4 amaReportAddressGotToControllerIpv6 amaReportAddressRecycledToControllerIpv6 amaReportHeartBeatToController amaReportLackOfAddressBlock</children>
         <flags>0</flags>
         <desc></desc>
     </node>
@@ -601,6 +601,46 @@
     </node>
     <node>
         <tagpath>/ama-report-heart-beat-to-controller/ama-id/</tagpath>
+        <namespace>urn:ietf:params:xml:ns:yang:ietf-address-pool:flexbng:vbras</namespace>
+        <primitive_type>0</primitive_type>
+        <min_occurs>0</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children></children>
+        <flags>0</flags>
+        <desc></desc>
+    </node>
+    <node>
+        <tagpath>/ama-report-lack-of-address-block/</tagpath>
+        <namespace>urn:ietf:params:xml:ns:yang:ietf-address-pool:flexbng:vbras</namespace>
+        <primitive_type>0</primitive_type>
+        <min_occurs>0</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children>deviceId domainName protocolType</children>
+        <flags>0</flags>
+        <desc></desc>
+    </node>
+    <node>
+        <tagpath>/ama-report-lack-of-address-block/device-id/</tagpath>
+        <namespace>urn:ietf:params:xml:ns:yang:ietf-address-pool:flexbng:vbras</namespace>
+        <primitive_type>0</primitive_type>
+        <min_occurs>0</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children></children>
+        <flags>0</flags>
+        <desc></desc>
+    </node>
+    <node>
+        <tagpath>/ama-report-lack-of-address-block/domain-name/</tagpath>
+        <namespace>urn:ietf:params:xml:ns:yang:ietf-address-pool:flexbng:vbras</namespace>
+        <primitive_type>0</primitive_type>
+        <min_occurs>0</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children></children>
+        <flags>0</flags>
+        <desc></desc>
+    </node>
+    <node>
+        <tagpath>/ama-report-lack-of-address-block/protocol-type/</tagpath>
         <namespace>urn:ietf:params:xml:ns:yang:ietf-address-pool:flexbng:vbras</namespace>
         <primitive_type>0</primitive_type>
         <min_occurs>0</min_occurs>

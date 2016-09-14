@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.jms.Destination;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -92,18 +94,24 @@ public class Client {
             }
             
         	if (!dev.hasSession("msg")){
+        		logger.info("Start connecting device " + ip + ":" + port + " with "+ emsUserName + "......");
         		dev.connect(emsUserName);
+        		logger.info("End connecting device");
         		CertusnetIOSubscriber certusnetIOSubscriber = new CertusnetIOSubscriber("dev-"+ip,addressBlockMessageService,queueDestination);
+        		logger.info("Start create new session with name msg");
         		dev.newSession(certusnetIOSubscriber,"msg");
+        		logger.info("Start create new session with name cfg");
         		dev.newSession("cfg");
+        		logger.info("Session creation finished.");
         	}
         } catch (IOException e) {
-        	logger.error("Can't connect");
+        	logger.error("Can't connect cause IOException: " + e.getMessage());
         } catch (JNCException e1) {
         	e1.printStackTrace();
         	logger.error("Can't authenticate: " + e1.getMessage());
         } catch(Exception e2){
         	e2.printStackTrace();
+        	logger.error("Can't connect cause Exception: " + e2.getMessage());
         }
     }
     
@@ -121,6 +129,8 @@ public class Client {
     	return dev.getSession(sessionName);
     }*/
     public NetconfSession getSession(Device d,String sessionName){
+		logger.info("Enter method Client::getSession for sessionName " + sessionName+ " and device "
+				+ ReflectionToStringBuilder.toString(d,ToStringStyle.MULTI_LINE_STYLE));
     	return d.getSession(sessionName);
     }
     

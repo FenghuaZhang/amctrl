@@ -12,6 +12,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
 import com.chinatele.app.amctrl.service.AddressBlockMessageService;
+import com.chinatele.app.amctrl.util.Constants;
 
 public class AddressBlockMessageServiceImpl implements AddressBlockMessageService {
 
@@ -52,20 +53,22 @@ public class AddressBlockMessageServiceImpl implements AddressBlockMessageServic
         jmsTemplate.send(destination, new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 Message wrappedMessage = session.createObjectMessage();
-                if (message.indexOf("address-pool-status") > -1) {
-                    wrappedMessage.setObjectProperty("pool_state", message);
-                } else if (message.indexOf("ama-register-to-controller") > -1){
-                	wrappedMessage.setObjectProperty("register_confirm", message);
-                } else if (message.indexOf("ama-report-address-got-to-controller-ipv4") > -1) {
-                    wrappedMessage.setObjectProperty("address_block_ipv4_config_confirm", message);
-                } else if (message.indexOf("ama-report-address-recycled-to-controller-ipv4") > -1) {
-                    wrappedMessage.setObjectProperty("address_block_ipv4_recycle_confirm", message);
-                } else if (message.indexOf("ama-report-address-got-to-controller-ipv6") > -1) {
-                    wrappedMessage.setObjectProperty("address_block_ipv6_config_confirm", message);
-                } else if (message.indexOf("ama-report-address-recycled-to-controller-ipv6") > -1) {
-                    wrappedMessage.setObjectProperty("address_block_ipv6_recycle_confirm", message);
-                } else if (message.indexOf("ama-report-heart-beat-to-controller") > -1) {
-                    wrappedMessage.setObjectProperty("heart_beat", message);
+                if (message.indexOf(Constants.Notification.NOTIFY_ID_OF_AMA_REPORT_ADDRESS_POOL_STATUS) > -1) {
+                    wrappedMessage.setObjectProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_ADDRESS_POOL_STATUS, message);
+                } else if (message.indexOf(Constants.Notification.NOTIFY_ID_OF_AMA_REGISTER_TO_CONTROLLER) > -1){
+                	wrappedMessage.setObjectProperty(Constants.Notification.MSG_ID_OF_AMA_REGISTER_TO_CONTROLLER, message);
+                } else if (message.indexOf(Constants.Notification.NOTIFY_ID_OF_AMA_REPORT_ADDRESS_GOT_V4) > -1) {
+                    wrappedMessage.setObjectProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_ADDRESS_GOT_V4, message);
+                } else if (message.indexOf(Constants.Notification.NOTIFY_ID_OF_AMA_REPORT_ADDRESS_RECYCLED_V4) > -1) {
+                    wrappedMessage.setObjectProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_ADDRESS_RECYCLED_V4, message);
+                } else if (message.indexOf(Constants.Notification.NOTIFY_ID_OF_AMA_REPORT_ADDRESS_GOT_V6) > -1) {
+                    wrappedMessage.setObjectProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_ADDRESS_GOT_V6, message);
+                } else if (message.indexOf(Constants.Notification.NOTIFY_ID_OF_AMA_REPORT_ADDRESS_RECYCLED_V6) > -1) {
+                    wrappedMessage.setObjectProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_ADDRESS_RECYCLED_V6, message);
+                } else if (message.indexOf(Constants.Notification.NOTIFY_ID_OF_AMA_REPORT_HEARTBEAT) > -1) {
+                    wrappedMessage.setObjectProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_HEARTBEAT, message);
+                } else if (message.indexOf(Constants.Notification.NOTIFY_ID_OF_AMA_LACK_BLOCK) > -1) {
+                	wrappedMessage.setObjectProperty(Constants.Notification.MSG_ID_OF_AMA_LACK_BLOCK, message);
                 }
                 return wrappedMessage;
             }

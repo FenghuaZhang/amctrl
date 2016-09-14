@@ -197,59 +197,68 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
         log.info("收到一条消息：" + message);
         try {
             // 上报设备注册信息
-            String xmlRegisterConfirmMessage = message.getStringProperty("register_confirm");
+			String xmlRegisterConfirmMessage = message
+					.getStringProperty(Constants.Notification.MSG_ID_OF_AMA_REGISTER_TO_CONTROLLER);
             if (xmlRegisterConfirmMessage != null) {
                 reportRegisterConfirm(xmlRegisterConfirmMessage);
             }
 
             // 上报地址池状态消息
-            String xmlPoolStateMessage = message.getStringProperty("pool_state");
+			String xmlPoolStateMessage = message
+					.getStringProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_ADDRESS_POOL_STATUS);
             if (xmlPoolStateMessage != null) {
                 Thread thread = new ReportPoolStateThread(xmlPoolStateMessage);
                 thread.start();
             }
 
             // 上报ipv4下发地址确认消息
-            String xmlAddressBlockIpv4ConfigConfirm = message.getStringProperty("address_block_ipv4_config_confirm");
+			String xmlAddressBlockIpv4ConfigConfirm = message
+					.getStringProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_ADDRESS_GOT_V4);
             if (xmlAddressBlockIpv4ConfigConfirm != null) {
                 reportIpv4ConfigConfirm(xmlAddressBlockIpv4ConfigConfirm);
             }
 
             // 上报ipv4回收地址确认消息
-            String xmlAddressBlockIpv4RecycleConfirm = message.getStringProperty("address_block_ipv4_recycle_confirm");
+			String xmlAddressBlockIpv4RecycleConfirm = message
+					.getStringProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_ADDRESS_RECYCLED_V4);
             if (xmlAddressBlockIpv4RecycleConfirm != null) {
                 reportIpv4RecycleConfirm(xmlAddressBlockIpv4RecycleConfirm);
             }
 
             // 上报ipv6下发地址确认消息
-            String xmlAddressBlockIpv6ConfigConfirm = message.getStringProperty("address_block_ipv6_config_confirm");
+			String xmlAddressBlockIpv6ConfigConfirm = message
+					.getStringProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_ADDRESS_GOT_V6);
             if (xmlAddressBlockIpv6ConfigConfirm != null) {
                 reportIpv6ConfigConfirm(xmlAddressBlockIpv6ConfigConfirm);
             }
 
             // 上报ipv6回收地址确认消息
-            String xmlAddressBlockIpv6RecycleConfirm = message.getStringProperty("address_block_ipv6_recycle_confirm");
+			String xmlAddressBlockIpv6RecycleConfirm = message
+					.getStringProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_ADDRESS_RECYCLED_V6);
             if (xmlAddressBlockIpv6RecycleConfirm != null) {
                 reportIpv6RecycleConfirm(xmlAddressBlockIpv6RecycleConfirm);
             }
 
             // 维护heart_beat消息
-            String xmlHeartBeat = message.getStringProperty("heart_beat");
+			String xmlHeartBeat = message
+					.getStringProperty(Constants.Notification.MSG_ID_OF_AMA_REPORT_HEARTBEAT);
             if (xmlHeartBeat != null) {
                 maintainDeviceAliveState(xmlHeartBeat);
             }
-
-            // 上报设备下线消息
-            String xmlDeviceDown = message.getStringProperty("device_down");
-            if (xmlDeviceDown != null) {
-                reportDeviceDown(xmlDeviceDown);
+            
+            // report block lacking notification to north side--app when notification from south side coming
+			String xmlBlockLacking = message
+					.getStringProperty(Constants.Notification.MSG_ID_OF_AMA_LACK_BLOCK);
+            if (xmlBlockLacking != null) {
+                reportBlockLacking(xmlBlockLacking);
             }
+            
         } catch (JMSException e) {
             log.error("jms exception", e);
         }
     }
 
-    private void reportRegisterConfirm(String xmlRegisterConfirmMessage) {
+	private void reportRegisterConfirm(String xmlRegisterConfirmMessage) {
         RegisterConfirmNotifaction registerConfirmNotifaction = null;
         try {
             registerConfirmNotifaction = JaxbUtil.convertToJavaBean(xmlRegisterConfirmMessage, RegisterConfirmNotifaction.class);
@@ -813,4 +822,18 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
 		}
 		return vo;
 	}
+    /**
+     * This will be invoked when lack of block in south side, let app know and app decides whether allocate block or not
+     * @param xmlBlockLacking
+     */
+    private void reportBlockLacking(String xmlBlockLacking) {
+		// TODO Auto-generated method stub
+    	try {
+    		log.info("ControllerServiceImpl::reportBlockLacking() Converting xml to json and report to app: " + xmlBlockLacking);
+			RequestAppClient.reportBlockLacking(xmlBlockLacking);
+		} catch (Exception e) {
+			log.error("ControllerServiceImpl::reportBlockLacking() error occurs when xml converting to json ", e);
+		}
+	}
+
 }

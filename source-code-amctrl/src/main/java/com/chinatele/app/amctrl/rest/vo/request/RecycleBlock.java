@@ -22,6 +22,9 @@ public class RecycleBlock {
 
     /** 地址块租用时间(0:表示回收) */
     private int leasing_time;
+    
+    /** recycle address pool or not(0: yes;1: no)*/
+    private int recycleAddrPool;
 
     public int getDevice_id() {
         return device_id;
@@ -78,4 +81,13 @@ public class RecycleBlock {
     public void setLeasing_time(int leasing_time) {
         this.leasing_time = leasing_time;
     }
+
+	public int getRecycleAddrPool() {
+		return recycleAddrPool;
+	}
+
+	public void setRecycleAddrPool(int recycleAddrPool) {
+		this.recycleAddrPool = recycleAddrPool;
+	}
+    
 }

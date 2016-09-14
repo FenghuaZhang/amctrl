@@ -63,5 +63,35 @@ public class Constants {
     public static final int RELEASE_ADDRESS_POOL_SUCCESS = 0;
     public static final int RELEASE_ADDRESS_POOL_ERROR = 110;
     public static final int RELEASE_ADDRESS_POOL_NOT_EXIST = 111;
+    
+    public static interface Notification {
+    	public static final String NOTIFY_ID_OF_AMA_REPORT_ADDRESS_POOL_STATUS = "address-pool-status";
+    	public static final String MSG_ID_OF_AMA_REPORT_ADDRESS_POOL_STATUS = "pool_state";
+    	
+    	public static final String NOTIFY_ID_OF_AMA_REGISTER_TO_CONTROLLER = "ama-register-to-controller";
+    	public static final String MSG_ID_OF_AMA_REGISTER_TO_CONTROLLER = "register_confirm";
+    	
+    	public static final String NOTIFY_ID_OF_AMA_REPORT_ADDRESS_GOT_V4 = "ama-report-address-got-to-controller-ipv4";
+    	public static final String MSG_ID_OF_AMA_REPORT_ADDRESS_GOT_V4 = "address_block_ipv4_config_confirm";
+    	
+    	public static final String NOTIFY_ID_OF_AMA_REPORT_ADDRESS_RECYCLED_V4 = "ama-report-address-recycled-to-controller-ipv4";
+    	public static final String MSG_ID_OF_AMA_REPORT_ADDRESS_RECYCLED_V4 = "address_block_ipv4_recycle_confirm";
+    	
+    	public static final String NOTIFY_ID_OF_AMA_REPORT_ADDRESS_GOT_V6 = "ama-report-address-got-to-controller-ipv6";
+    	public static final String MSG_ID_OF_AMA_REPORT_ADDRESS_GOT_V6 = "address_block_ipv6_config_confirm";
+    	
+    	public static final String NOTIFY_ID_OF_AMA_REPORT_ADDRESS_RECYCLED_V6 = "ama-report-address-recycled-to-controller-ipv6";
+    	public static final String MSG_ID_OF_AMA_REPORT_ADDRESS_RECYCLED_V6 = "address_block_ipv6_recycle_confirm";
+    	
+    	public static final String NOTIFY_ID_OF_AMA_REPORT_HEARTBEAT = "ama-report-heart-beat-to-controller";
+    	public static final String MSG_ID_OF_AMA_REPORT_HEARTBEAT = "heart_beat";
+    	
+    	public static final String NOTIFY_ID_OF_AMA_LACK_BLOCK = "ama-report-lack-of-address-block";
+    	public static final String MSG_ID_OF_AMA_LACK_BLOCK = "ama_report_lack_of_address_block_msg";
+    }
 
+    public interface RecycleAddressPool {
+    	public static final int YES = 0; // recycle
+    	public static final int NO = 1; // not recycle
+    }
 }
