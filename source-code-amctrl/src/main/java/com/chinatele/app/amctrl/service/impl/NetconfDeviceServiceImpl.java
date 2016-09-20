@@ -233,8 +233,6 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 			NetconfSession session = client.getSession(Client.devices.get(device.getDevice_ip()),"cfg");
 			logger.info("After getting cfg session......");
 			
-			logger.info(ReflectionToStringBuilder.toString(session.getConfig("address-pools"), ToStringStyle.MULTI_LINE_STYLE));
-			logger.info("After testing getConfig address-pools");
 			if (session.getConfig("address-pools") == null || session.getConfig("address-pools").size() == 0){
 				logger.info("After getting nulled config address-pools......");
 				AddressPools pools = new AddressPools();
@@ -268,8 +266,7 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 			
 			logger.info("Before getting config address-pools......");
 			Element configuration = Client.getConfig(session.getConfig("address-pools"),"address-pools");
-			logger.info("After getting config address-pools with returned configuration: "
-					+ ReflectionToStringBuilder.toString(configuration,	ToStringStyle.MULTI_LINE_STYLE));
+			logger.info("After getting config address-pools with returned configuration");
 			
 			boolean matchPool = false;
 			boolean matchBlock = false;
