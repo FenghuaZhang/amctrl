@@ -66,7 +66,7 @@ public class ReportPoolStatus {
                         AddressPoolRange addressPoolRange = new AddressPoolRange();
                         addressPoolRange.setAddress_block_id(ipv4Block.getIpv4AddressBlockId());
                         addressPoolRange.setAddress_block_name(ipv4Block.getIpv4AddressBlockName());
-                        addressPoolRange.setAverage_address_usage_ratio(ipv4Block.getAverageAddressUsageRatio() / 100.0f);
+                        addressPoolRange.setAverage_address_usage_ratio(ipv4Block.getAverageAddressUsageRatio());
                         addressPoolRanges.add(addressPoolRange);
                     }
                     reportAddressPool.setAddress_pool_ranges(addressPoolRanges);
@@ -76,7 +76,7 @@ public class ReportPoolStatus {
                         AddressPoolRange addressPoolRange = new AddressPoolRange();
                         addressPoolRange.setAddress_block_id(ipv6Block.getIpv6AddressBlockId());
                         addressPoolRange.setAddress_block_name(ipv6Block.getIpv6AddressBlockName());
-                        addressPoolRange.setAverage_address_usage_ratio(ipv6Block.getAverageAddressUsageRatio() / 100.0f);
+                        addressPoolRange.setAverage_address_usage_ratio(ipv6Block.getAverageAddressUsageRatio());
                         addressPoolRanges.add(addressPoolRange);
                     }
                     reportAddressPool.setAddress_pool_ranges(addressPoolRanges);

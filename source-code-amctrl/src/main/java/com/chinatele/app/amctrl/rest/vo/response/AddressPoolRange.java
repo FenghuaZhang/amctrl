@@ -8,8 +8,8 @@ public class AddressPoolRange {
     /** 地址块名称 */
     private String address_block_name;
 
-    /** 地址块使用比例的平均值 */
-    private float average_address_usage_ratio;
+    /** 地址块使用值 */
+    private int average_address_usage_ratio;
 
     public int getAddress_block_id() {
         return address_block_id;
@@ -27,11 +27,11 @@ public class AddressPoolRange {
         this.address_block_name = address_block_name;
     }
 
-    public float getAverage_address_usage_ratio() {
+    public int getAverage_address_usage_ratio() {
         return average_address_usage_ratio;
     }
 
-    public void setAverage_address_usage_ratio(float average_address_usage_ratio) {
+    public void setAverage_address_usage_ratio(int average_address_usage_ratio) {
         this.average_address_usage_ratio = average_address_usage_ratio;
     }
 }
