@@ -50,6 +50,9 @@ public class ReportPoolStatus {
         if (poolStatus.getAddressPools() != null) {
             List<ReportAddressPool> reportAddressPools = new ArrayList<ReportAddressPool>();
             for (AddressPool addressPool : poolStatus.getAddressPools()) {
+            	if (addressPool.getAddressPoolEntities() == null) {
+            		continue;
+            	}
                 ReportAddressPool reportAddressPool = new ReportAddressPool();
                 reportAddressPool.setDomain_name(addressPool.getDomainName());
                 reportAddressPool.setAddress_pool_name(addressPool.getAddressPoolName());
