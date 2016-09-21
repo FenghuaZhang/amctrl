@@ -179,6 +179,8 @@ public class RequestAppClient {
 			}
 		}
 		
+		log.info("RequestAppClient::reportBlockLacking() Json Msg to be sent to App: " + jsonObject.toString());
+		
 		HttpPost post = new HttpPost(uri);
         StringEntity entity = new StringEntity(jsonObject.toString(), "utf-8");
         entity.setContentType(MediaType.APPLICATION_JSON_VALUE);
