@@ -1,7 +1,6 @@
 package com.chinatele.app.amctrl.rest.na;
 
 import net.sf.json.JSONObject;
-import net.sf.json.xml.XMLSerializer;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -20,6 +19,7 @@ import com.chinatele.app.amctrl.rest.vo.ResponseVo;
 import com.chinatele.app.amctrl.rest.vo.response.AllocateRecycleAddress;
 import com.chinatele.app.amctrl.rest.vo.response.ReportAddressBlockConfirm;
 import com.chinatele.app.amctrl.rest.vo.response.ReportPoolStatus;
+import com.chinatele.app.amctrl.service.dto.BlockLacking;
 import com.chinatele.app.amctrl.util.ConfigUtil;
 import com.chinatele.app.amctrl.util.Constants;
 import com.chinatele.app.amctrl.util.JsonUtil;
@@ -162,30 +162,25 @@ public class RequestAppClient {
         }
     }
 
-	public static void reportBlockLacking(String xmlBlockLacking) throws Exception {
+	public static void reportBlockLacking(BlockLacking blockLacking) throws Exception {
 		String appUrl = ConfigUtil.getValue("APP_URL");
         String uri = appUrl + "/controller_report_address_lacking";
         HttpClientBuilder builder = HttpClientBuilder.create();
         HttpClient httpClient = builder.build();
-        
-        // xml to json handler
-        XMLSerializer xmlSerializer = new XMLSerializer();
-        JSONObject jsonObj = (JSONObject)xmlSerializer.read(xmlBlockLacking);
-        String jsonStr = StringUtils.EMPTY;
-        if (jsonObj.has(Constants.Notification.NOTIFY_ID_OF_AMA_LACK_BLOCK)) {
-        	JSONObject obj = (JSONObject) jsonObj.get(Constants.Notification.NOTIFY_ID_OF_AMA_LACK_BLOCK);
-        	// remove xmlns property
-        	if(obj.has("@xmlns")) {
-        		obj.remove("@xmlns");	
-        	}
-        	jsonStr = obj.toString();        	
-        	log.info("RequestAppClient::reportBlockLacking() JSON after converting from xml is: ", jsonStr);
-        } else {
-        	log.error("Node " + Constants.Notification.NOTIFY_ID_OF_AMA_LACK_BLOCK + " is not found, please check the received notification.");
-        }
-        
-        HttpPost post = new HttpPost(uri);
-        StringEntity entity = new StringEntity(jsonStr, "utf-8");
+        JSONObject jsonObject = JSONObject.fromObject(blockLacking);
+		
+        // converting property names
+        String[] fromKeyArray = {"deviceId","domainName","protocolType"};
+        String[] toKeyArray = {"device-id","domain-name","protocol-type"};
+		for(int i=0;i<fromKeyArray.length;i++) {
+			if (jsonObject.has(fromKeyArray[i])) {
+    			jsonObject.put(toKeyArray[i], jsonObject.get(fromKeyArray[i]));
+    			jsonObject.remove(fromKeyArray[i]);
+			}
+		}
+		
+		HttpPost post = new HttpPost(uri);
+        StringEntity entity = new StringEntity(jsonObject.toString(), "utf-8");
         entity.setContentType(MediaType.APPLICATION_JSON_VALUE);
         post.setEntity(entity);
         

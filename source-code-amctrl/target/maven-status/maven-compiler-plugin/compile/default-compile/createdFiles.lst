@@ -1,6 +1,7 @@
 gen/addressPool/ietfYangTypes/ZeroBasedCounter32.class
 com/chinatele/app/amctrl/rest/vo/request/AllocateBlock.class
 com/chinatele/app/amctrl/rest/filter/ResponseFilter.class
+com/chinatele/app/amctrl/service/dto/BlockLackingNotification.class
 gen/deviceInfo/flexbngDeviceInfo/AmaReportAddressRecycledToControllerIpv4.class
 gen/addressPool/ietfYangTypes/Gauge64.class
 gen/addressPool/ietfAddressPool/addressPools/addressPool/addressPoolEntries/Ipv6AddressBlock.class
@@ -161,6 +162,7 @@ com/chinatele/app/amctrl/service/impl/NetconfDeviceServiceImpl.class
 gen/addressPool/tailfCommon/CliTemplateString.class
 com/chinatele/app/amctrl/service/dto/HeartBeatNotification.class
 com/chinatele/app/amctrl/rest/vo/ResponseVo.class
+com/chinatele/app/amctrl/service/dto/BlockLacking.class
 gen/addressPool/tailfXsdTypes/JFloat.class
 com/chinatele/app/amctrl/rest/vo/request/Device.class
 com/chinatele/app/amctrl/rest/vo/AddressPool.class

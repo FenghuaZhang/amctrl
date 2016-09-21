@@ -119,6 +119,7 @@
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/com/chinatele/app/amctrl/rest/vo/ResponseVo.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/addressPool/tailfCommon/Sha256DigestString.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/addressPool/ietfInetTypes/IpPrefix.java
+/home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/com/chinatele/app/amctrl/service/dto/BlockLacking.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/addressPool/ietfInetTypes/Inet.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/com/chinatele/app/amctrl/service/dto/IPv6ConfigConfirmNotification.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/com/chinatele/app/amctrl/service/dto/AddressBlockIPv4.java
@@ -155,6 +156,7 @@
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/addressPool/tailfCommon/SnmpIdentifier.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/com/chinatele/app/amctrl/rest/na/RequestAppClient.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/com/chinatele/app/amctrl/rest/vo/ConnectionConfigInfo.java
+/home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/com/chinatele/app/amctrl/service/dto/BlockLackingNotification.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/deviceInfo/flexbngDeviceInfo/ResultStatus.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/addressPool/tailfCommon/Identifier.java
 /home/zhangfh/Downloads/amctrl/source-code-amctrl/src/main/java/gen/deviceInfo/flexbngDeviceInfo/AmaReportAddressRecycledToControllerIpv6.java

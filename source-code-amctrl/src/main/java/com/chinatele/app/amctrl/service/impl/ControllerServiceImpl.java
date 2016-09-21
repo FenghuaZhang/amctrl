@@ -37,6 +37,7 @@ import com.chinatele.app.amctrl.rest.vo.response.ReportDeviceState;
 import com.chinatele.app.amctrl.rest.vo.response.ReportPoolStatus;
 import com.chinatele.app.amctrl.service.ControllerService;
 import com.chinatele.app.amctrl.service.NetconfDeviceService;
+import com.chinatele.app.amctrl.service.dto.BlockLackingNotification;
 import com.chinatele.app.amctrl.service.dto.ConfirmInfo;
 import com.chinatele.app.amctrl.service.dto.DeviceDownNotification;
 import com.chinatele.app.amctrl.service.dto.DeviceState;
@@ -828,11 +829,18 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
      */
     private void reportBlockLacking(String xmlBlockLacking) {
 		// TODO Auto-generated method stub
+    	log.info("ControllerServiceImpl::reportBlockLacking() Converting xml to json and report to app: " + xmlBlockLacking);
+
+    	BlockLackingNotification blockLackingNotification = null;
+        try {
+        	blockLackingNotification = JaxbUtil.convertToJavaBean(xmlBlockLacking, BlockLackingNotification.class);
+        } catch (Exception e) {
+            log.error("fail to convert xml string to java bean", e);
+        }
     	try {
-    		log.info("ControllerServiceImpl::reportBlockLacking() Converting xml to json and report to app: " + xmlBlockLacking);
-			RequestAppClient.reportBlockLacking(xmlBlockLacking);
+    		RequestAppClient.reportBlockLacking(blockLackingNotification.getBlockLacking());
 		} catch (Exception e) {
-			log.error("ControllerServiceImpl::reportBlockLacking() error occurs when xml converting to json ", e);
+			log.error("ControllerServiceImpl::reportBlockLacking() error occurs when report block lacking to app ", e);
 		}
 	}
 
