@@ -12,6 +12,9 @@ public class ReportAddressPool {
 
     /** 地址池名称 */
     private String address_pool_name;
+    
+    /** protocal type added in 2016/9/22[1:v4;0:v6]*/
+    private int protocol_type;
 
     /** 地址块信息 */
     private List<AddressPoolRange> address_pool_ranges;
@@ -40,7 +43,15 @@ public class ReportAddressPool {
         this.address_pool_name = address_pool_name;
     }
 
-    public List<AddressPoolRange> getAddress_pool_ranges() {
+    public int getProtocol_type() {
+		return protocol_type;
+	}
+
+	public void setProtocol_type(int protocol_type) {
+		this.protocol_type = protocol_type;
+	}
+
+	public List<AddressPoolRange> getAddress_pool_ranges() {
         return address_pool_ranges;
     }
 

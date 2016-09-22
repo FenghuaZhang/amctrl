@@ -8,6 +8,7 @@ import com.chinatele.app.amctrl.service.dto.AddressBlockIPv6;
 import com.chinatele.app.amctrl.service.dto.AddressPool;
 import com.chinatele.app.amctrl.service.dto.AddressPoolEntities;
 import com.chinatele.app.amctrl.service.dto.PoolStatus;
+import com.chinatele.app.amctrl.util.Constants;
 
 public class ReportPoolStatus {
 
@@ -70,6 +71,7 @@ public class ReportPoolStatus {
                         addressPoolRanges.add(addressPoolRange);
                     }
                     reportAddressPool.setAddress_pool_ranges(addressPoolRanges);
+                    reportAddressPool.setProtocol_type(Constants.PROTOCOL_TYPE_IPV4);
                 } else if (ipv6Blocks != null) {
                     List<AddressPoolRange> addressPoolRanges = new ArrayList<AddressPoolRange>();
                     for (AddressBlockIPv6 ipv6Block : ipv6Blocks) {
@@ -80,6 +82,7 @@ public class ReportPoolStatus {
                         addressPoolRanges.add(addressPoolRange);
                     }
                     reportAddressPool.setAddress_pool_ranges(addressPoolRanges);
+                    reportAddressPool.setProtocol_type(Constants.PROTOCOL_TYPE_IPV6);
                 }
                 reportAddressPools.add(reportAddressPool);
             }
