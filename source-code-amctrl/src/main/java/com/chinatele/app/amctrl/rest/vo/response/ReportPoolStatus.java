@@ -16,7 +16,7 @@ public class ReportPoolStatus {
     private int device_id;
 
     /** 上报时间 */
-    private double time;
+    private long time;
 
     /** 所有地址池 */
     private List<ReportAddressPool> address_pool;
@@ -29,11 +29,11 @@ public class ReportPoolStatus {
         this.device_id = device_id;
     }
 
-    public double getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(double time) {
+    public void setTime(long time) {
         this.time = time;
     }
 
@@ -47,7 +47,7 @@ public class ReportPoolStatus {
 
     public void convertFromDto(PoolStatus poolStatus) {
         this.device_id = poolStatus.getDeviceId();
-        this.time = poolStatus.getTime();
+        this.time = (long) poolStatus.getTime();
         if (poolStatus.getAddressPools() != null) {
             List<ReportAddressPool> reportAddressPools = new ArrayList<ReportAddressPool>();
             for (AddressPool addressPool : poolStatus.getAddressPools()) {
