@@ -153,11 +153,12 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
                 deviceConfigInfo.setState_update_interval(configInfo.getState_update_interval());
                 deviceConfigInfo.setDevice_sampling_interval(configInfo.getDevice_sampling_interval());
                 log.info("build link with device[deviceId={}]", device.getDevice_id());
-                boolean flag = netconfDeviceService.openConnection(deviceConfigInfo);
-                if (flag) {
-                    log.info("build link device[deviceId={}] success!", device.getDevice_id());
-                    // 设置当前设备状态为“活着”状态
-                    synchronized(deviceIdLock) {
+                // lock device in case that allocate address block while device state is not alive
+                synchronized(deviceIdLock) {
+	                boolean flag = netconfDeviceService.openConnection(deviceConfigInfo);
+	                if (flag) {
+	                    log.info("build link device[deviceId={}] success!", device.getDevice_id());
+	                    // 设置当前设备状态为“活着”状态
                     	log.info("start set device alive...");
                     	
                         List<DeviceState> deviceStateList = deviceAliveStateMap.get(device.getDevice_id());
@@ -166,26 +167,26 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
                         deviceState.setDeviceId(device.getDevice_id());
                         deviceState.setTime(new Date(System.currentTimeMillis()));
                         deviceStateList.add(deviceState);
-                    }
-                    log.info("end set device alive...");
-                } else {
-                    log.error("can not build link with device[id={}]", device.getDevice_id());
-                    // 表示设备连接失败，从列表中删除
-                    synchronized(deviceIdLock) {
-                    	log.info("device connect failed,start remove device...");
-                        deviceAliveStateMap.remove(device.getDevice_id());
-                        idObjectMap.remove(device.getDevice_id());
-                    }
-                    log.info("device connect failed,end remove device...");
-                    boolean reportConnectionFailed = false;//是否上报设备id给app连接失败
-                    if (reportConnectionFailed) {
-                        int deviceId = deviceConfigInfo.getDevice_id();
-                        try {
-                            RequestAppClient.reportFailedDevice(deviceId);
-                        } catch (Exception e) {
-                            log.error("" + e);
-                        }
-                    }
+	                    log.info("end set device alive...");
+	                } else {
+	                    log.error("can not build link with device[id={}]", device.getDevice_id());
+	                    // 表示设备连接失败，从列表中删除
+//	                    synchronized(deviceIdLock) {
+	                    	log.info("device connect failed,start remove device...");
+	                        deviceAliveStateMap.remove(device.getDevice_id());
+	                        idObjectMap.remove(device.getDevice_id());
+//	                    }
+	                    log.info("device connect failed,end remove device...");
+	                    boolean reportConnectionFailed = false;//是否上报设备id给app连接失败
+	                    if (reportConnectionFailed) {
+	                        int deviceId = deviceConfigInfo.getDevice_id();
+	                        try {
+	                            RequestAppClient.reportFailedDevice(deviceId);
+	                        } catch (Exception e) {
+	                            log.error("" + e);
+	                        }
+	                    }
+	                }
                 }
             }
         }
