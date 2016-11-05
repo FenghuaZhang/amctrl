@@ -52,6 +52,10 @@ import com.chinatele.app.amctrl.util.ConfigUtil;
 import com.chinatele.app.amctrl.util.Constants;
 import com.chinatele.app.amctrl.util.JaxbUtil;
 
+/**
+ * @author zhangfh
+ *
+ */
 public class ControllerServiceImpl implements ControllerService, MessageListener {
 
     private Logger log = LoggerFactory.getLogger(ControllerServiceImpl.class);
@@ -153,14 +157,14 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
                 deviceConfigInfo.setState_update_interval(configInfo.getState_update_interval());
                 deviceConfigInfo.setDevice_sampling_interval(configInfo.getDevice_sampling_interval());
                 log.info("build link with device[deviceId={}]", device.getDevice_id());
-                // lock device in case that allocate address block while device state is not alive
-                synchronized(deviceIdLock) {
-	                boolean flag = netconfDeviceService.openConnection(deviceConfigInfo);
-	                if (flag) {
-	                    log.info("build link device[deviceId={}] success!", device.getDevice_id());
-	                    // 设置当前设备状态为“活着”状态
-                    	log.info("start set device alive...");
-                    	
+                boolean flag = netconfDeviceService.openConnection(deviceConfigInfo);
+                if (flag) {
+                    log.info("build link device[deviceId={}] success!", device.getDevice_id());
+                    // 设置当前设备状态为“活着”状态
+                	log.info("start set device alive...");
+                	
+                	// lock device in case that allocate address block while device state is not alive
+                	synchronized(deviceIdLock) {
                         List<DeviceState> deviceStateList = deviceAliveStateMap.get(device.getDevice_id());
                         DeviceState deviceState = new DeviceState();
                         deviceState.setIsAlive(Constants.DEVICE_STATE_ALIVE);
@@ -168,25 +172,25 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
                         deviceState.setTime(new Date(System.currentTimeMillis()));
                         deviceStateList.add(deviceState);
 	                    log.info("end set device alive...");
-	                } else {
-	                    log.error("can not build link with device[id={}]", device.getDevice_id());
-	                    // 表示设备连接失败，从列表中删除
-//	                    synchronized(deviceIdLock) {
-	                    	log.info("device connect failed,start remove device...");
-	                        deviceAliveStateMap.remove(device.getDevice_id());
-	                        idObjectMap.remove(device.getDevice_id());
-//	                    }
-	                    log.info("device connect failed,end remove device...");
-	                    boolean reportConnectionFailed = false;//是否上报设备id给app连接失败
-	                    if (reportConnectionFailed) {
-	                        int deviceId = deviceConfigInfo.getDevice_id();
-	                        try {
-	                            RequestAppClient.reportFailedDevice(deviceId);
-	                        } catch (Exception e) {
-	                            log.error("" + e);
-	                        }
-	                    }
-	                }
+                	}
+            	} else {
+                    log.error("can not build link with device[id={}]", device.getDevice_id());
+                    // 表示设备连接失败，从列表中删除
+                    synchronized(deviceIdLock) {
+                    	log.info("device connect failed,start remove device...");
+                        deviceAliveStateMap.remove(device.getDevice_id());
+                        idObjectMap.remove(device.getDevice_id());
+                    }
+                    log.info("device connect failed,end remove device...");
+                    boolean reportConnectionFailed = false;//是否上报设备id给app连接失败
+                    if (reportConnectionFailed) {
+                        int deviceId = deviceConfigInfo.getDevice_id();
+                        try {
+                            RequestAppClient.reportFailedDevice(deviceId);
+                        } catch (Exception e) {
+                            log.error("Device id with " + device.getDevice_id() + " connecting failed" + e);
+                        }
+                    }
                 }
             }
         }
@@ -318,7 +322,7 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
         }
     }
 
-    private void allocateOrRecycleAddressBlock(AllocateRecycleAddress allocateRecycleAddress) {
+    private void allocateOrRecycleAddressBlock(AllocateRecycleAddress allocateRecycleAddress) throws Exception {
         int deviceId = allocateRecycleAddress.getDevice_id();
         String deviceIp = null;
         synchronized(deviceIdLock) {
@@ -664,7 +668,7 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
 
 
     @Override
-    public ResponseVo recycleAddress(RecycleBlock recycleBlock) {
+    public ResponseVo recycleAddress(RecycleBlock recycleBlock) throws Exception {
         ResponseVo vo = new ResponseVo();
         if (recycleBlock != null) {
             int deviceId = recycleBlock.getDevice_id();
@@ -709,10 +713,36 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
     }
 
     @Override
-    public ResponseVo allocateAddress(AllocateBlock allocateBlock) {
+    public ResponseVo allocateAddress(AllocateBlock allocateBlock) throws Exception {
         ResponseVo vo = new ResponseVo();
         if (allocateBlock != null) {
             int deviceId = allocateBlock.getDevice_id();
+            
+            // check device live state in case that device still connecting when device is invoked to alive first time
+            log.info("ControllerServiceImpl::allocateAddress() Checking device alive state for device " + deviceId);
+            List<DeviceState> deviceStateList = deviceAliveStateMap.get(deviceId);
+            DeviceState deviceState = deviceStateList.get(deviceStateList.size()-1);
+            int count = 0;
+            while(true) {
+            	if(Constants.DEVICE_STATE_ALIVE == deviceState.getIsAlive()) {
+            		log.info("Device with deviceId " + deviceId + " is already alive.");
+            		break;
+            	} else if(Constants.DEVICE_STATE_CONNECTING == deviceState.getIsAlive()) {
+            		Thread.sleep(10);
+            		count++;
+            		log.info("Tryed " + count + " times for device " + deviceId);
+            		if(count < 100) {
+            			continue;            			
+            		} else {
+            			log.error("Tryed 100 times to wait for device state to alive, but shows device " + deviceId+ " is still connecting.");
+            			throw new Exception("Tryed 100 times to wait for device state to alive, but shows device " + deviceId+ " is still connecting.");
+            		}
+            	} else {
+            		log.error("DeviceState " + deviceState.getIsAlive() + " of device with deviceId " + deviceId+ " is not expected.");
+            		throw new Exception("DeviceState " + deviceState.getIsAlive() + " of device with deviceId " + deviceId+ " is not expected.");
+            	}
+            }
+            
             log.info("begin to allocate address to device[deviceId={}]", deviceId);
             String deviceIp = null;
             synchronized(deviceIdLock) {
@@ -763,24 +793,31 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
 
     @Override
     public void clean() {
-        for(Integer deviceId : idObjectMap.keySet()) {
-            Device device = idObjectMap.get(deviceId);
-            if (device != null) {
-                String deviceIp = idObjectMap.get(deviceId).getDevice_ip();
-                netconfDeviceService.disconnectDevice(deviceIp);
-                synchronized (deviceIdLock) {
+    	synchronized (deviceIdLock) {
+	        for(Integer deviceId : idObjectMap.keySet()) {
+	            Device device = idObjectMap.get(deviceId);
+	            if (device != null) {
+	                String deviceIp = idObjectMap.get(deviceId).getDevice_ip();
+	                netconfDeviceService.disconnectDevice(deviceIp);
                 	log.info("start clean device...");
                     idObjectMap.remove(deviceId);
                     deviceAliveStateMap.remove(deviceId);
-                }
-                log.info("end clean device...");
-            } else {
-                log.error("device [{}] not in device list", deviceId);
-            }
-        }
-        log.info("cleaned session");
+	                log.info("end clean device...");
+	            } else {
+	                log.error("device [{}] not in device list", deviceId);
+	            }
+	        }
+	        log.info("cleaned session");
+    	}
     }
 
+    /**
+     * @deprecated
+     * @description 释放地址池 
+     * @author zhangfh
+     * @param releaseAddrPoolInfo
+     * @return
+     */
 	public ResponseVo deleteAddressPool(ReleaseAddrPoolInfo releaseAddrPoolInfo) {
 		ResponseVo vo = new ResponseVo();
 		if (releaseAddrPoolInfo != null){

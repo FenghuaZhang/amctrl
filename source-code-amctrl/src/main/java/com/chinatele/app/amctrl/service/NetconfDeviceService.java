@@ -19,9 +19,9 @@ public interface NetconfDeviceService {
 
     boolean validateSession(int deviceId, String deviceIp);
 
-    JSONObject allocateAddress(AllocateBlock allocateBlock, Map<Integer,Device> map);
+    JSONObject allocateAddress(AllocateBlock allocateBlock, Map<Integer,Device> map) throws Exception;
     
-    JSONObject recycleAddress(RecycleBlock recycleBlock,Map<Integer,Device> map);
+    JSONObject recycleAddress(RecycleBlock recycleBlock,Map<Integer,Device> map) throws Exception;
     
     JSONObject releaseAddressPool(ReleaseAddrPoolInfo releaseAddrPoolInfo,Map<Integer,Device> map);
 }

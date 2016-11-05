@@ -212,7 +212,7 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
     }
 
     @Override
-    public JSONObject allocateAddress(AllocateBlock allocateBlock, Map<Integer, com.chinatele.app.amctrl.rest.vo.request.Device> map) {
+    public JSONObject allocateAddress(AllocateBlock allocateBlock, Map<Integer, com.chinatele.app.amctrl.rest.vo.request.Device> map) throws Exception{
     	logger.info("enter method:allocateAddress");
     	JSONObject successResult = new JSONObject();
         successResult.put("return_code", String.valueOf(Constants.ALLOCATE_AND_RECYCLE_ADDRESS_SUCCESS));
@@ -223,165 +223,163 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
         List<Integer> allocateNameRepeatList = new ArrayList<Integer>();
         com.chinatele.app.amctrl.rest.vo.request.Device device = map.get(allocateBlock.getDevice_id());
 		
-		try {
-			logger.info("Connecting to device " + device.getDevice_ip()	+ "......");
-			client.init(device.getDevice_ip(),device.getDevice_port(),device.getUsername(),device.getPassword());
-			FlexbngVbras.enable();
-			AddrPool.enable();
-			logger.info("Getting cfg session for device: "
-							+ ReflectionToStringBuilder.toString(Client.devices.get(device.getDevice_ip()),ToStringStyle.MULTI_LINE_STYLE));
-			NetconfSession session = client.getSession(Client.devices.get(device.getDevice_ip()),"cfg");
-			logger.info("After getting cfg session......");
-			
-			if (session.getConfig("address-pools") == null || session.getConfig("address-pools").size() == 0){
-				logger.info("After getting nulled config address-pools......");
-				AddressPools pools = new AddressPools();
-				pools.setDeviceIdValue(allocateBlock.getDevice_id());
-				//pools.setDomainNameValue(allocateBlock.getDomain_name());
-				//pools.setTimeValue(allocateBlock.getTime()+"");
-				session.getConfig().add(pools);
-				logger.info("After getting all config ......");
-				gen.addressPool.ietfAddressPool.addressPools.AddressPool netconfPool = pools.addAddressPool();
-				netconfPool.setAddressPoolNameValue(allocateBlock.getAddress_pool_name());
-				netconfPool.setAddressPoolIdValue(allocateBlock.getAddress_pool_id());
-				netconfPool.setDomainNameValue(allocateBlock.getDomain_name());
-				if (allocateBlock.getProtocol_type() == 0){
-					netconfPool.setIpv6UsergatewayValue(allocateBlock.getUsergateway());
-				}
-				else if (allocateBlock.getProtocol_type() == 1){
-					netconfPool.setIpv4UsergatewayValue(allocateBlock.getUsergateway());
-				}
-				
-				netconfPool.setGwnetmaskValue(allocateBlock.getGwnetmask());
-				netconfPool.setPrimarydnsValue(allocateBlock.getPrimary_dns());
-				if (!StringUtils.isEmpty(allocateBlock.getSecondary_dns())){
-					netconfPool.setSecondarydnsValue(allocateBlock.getSecondary_dns());
-				}
-				netconfPool.setLeasingTimeValue(allocateBlock.getLeasing_time());
-				netconfPool.addAddressPoolEntries();
-				logger.info("Before editing config address-pools......");
-				session.editConfig(pools);
-				logger.info("After editing config address-pools......");
+		
+		logger.info("Connecting to device " + device.getDevice_ip()	+ "......");
+		client.init(device.getDevice_ip(),device.getDevice_port(),device.getUsername(),device.getPassword());
+		FlexbngVbras.enable();
+		AddrPool.enable();
+		logger.info("Getting cfg session for device: "
+						+ ReflectionToStringBuilder.toString(Client.devices.get(device.getDevice_ip()),ToStringStyle.MULTI_LINE_STYLE));
+		NetconfSession session = client.getSession(Client.devices.get(device.getDevice_ip()),"cfg");
+		logger.info("After getting cfg session......");
+		
+		if (session.getConfig("address-pools") == null || session.getConfig("address-pools").size() == 0){
+			logger.info("After getting nulled config address-pools......");
+			AddressPools pools = new AddressPools();
+			pools.setDeviceIdValue(allocateBlock.getDevice_id());
+			//pools.setDomainNameValue(allocateBlock.getDomain_name());
+			//pools.setTimeValue(allocateBlock.getTime()+"");
+			session.getConfig().add(pools);
+			logger.info("After getting all config ......");
+			gen.addressPool.ietfAddressPool.addressPools.AddressPool netconfPool = pools.addAddressPool();
+			netconfPool.setAddressPoolNameValue(allocateBlock.getAddress_pool_name());
+			netconfPool.setAddressPoolIdValue(allocateBlock.getAddress_pool_id());
+			netconfPool.setDomainNameValue(allocateBlock.getDomain_name());
+			if (allocateBlock.getProtocol_type() == 0){
+				netconfPool.setIpv6UsergatewayValue(allocateBlock.getUsergateway());
+			}
+			else if (allocateBlock.getProtocol_type() == 1){
+				netconfPool.setIpv4UsergatewayValue(allocateBlock.getUsergateway());
 			}
 			
-			logger.info("Before getting config address-pools......");
-			Element configuration = Client.getConfig(session.getConfig("address-pools"),"address-pools");
-			logger.info("After getting config address-pools with returned configuration");
-			
-			boolean matchPool = false;
-			boolean matchBlock = false;
-			
-			if (configuration.hasChildren()){
-				for (Element e :configuration.getChildren("address-pool")){
-					if (e.getValue("address-pool-name").toString().equals(allocateBlock.getAddress_pool_name())){
-						matchPool = true;
-						
-						if (e.getChild("address-pool-entries")!=null){
-							ElementChildrenIterator it = e.getChild("address-pool-entries").iterator();
-							while (it.hasNext()){
-								Element ite = it.next();
-								String blockId = "";
-								String blockName = "";
-								if (allocateBlock.getProtocol_type() == 0){
-									if (ite.getValue("ipv6-address-block-id") != null){
-										blockId = ite.getValue("ipv6-address-block-id").toString();
-									}
-									if (ite.getValue("ipv6-address-block-name") != null){
-										blockName = ite.getValue("ipv6-address-block-name").toString();
-									}
-								}
-								else if (allocateBlock.getProtocol_type() == 1){
-									if (ite.getValue("ipv4-address-block-id") != null){
-										blockId = ite.getValue("ipv4-address-block-id").toString();
-									}
-									if (ite.getValue("ipv4-address-block-name") != null){
-										blockName = ite.getValue("ipv4-address-block-name").toString();
-									}
-								}
-								if (String.valueOf(allocateBlock.getAddress_block_id()).equals(blockId)){
-									matchBlock = true;
-									allocateIndexRepeatList.add(allocateBlock.getAddress_block_id());
-									break;
-								}
-								if (allocateBlock.getAddress_block_name().equals(blockName)){
-									matchBlock = true;
-									allocateNameRepeatList.add(allocateBlock.getAddress_block_id());
-									break;
-								}
-							}
-						}
-						
-						
-						if (!matchBlock){
-							if (e.getChild("address-pool-entries") == null){
-								e.createChild("address-pool-entries");
-							}
+			netconfPool.setGwnetmaskValue(allocateBlock.getGwnetmask());
+			netconfPool.setPrimarydnsValue(allocateBlock.getPrimary_dns());
+			if (!StringUtils.isEmpty(allocateBlock.getSecondary_dns())){
+				netconfPool.setSecondarydnsValue(allocateBlock.getSecondary_dns());
+			}
+			netconfPool.setLeasingTimeValue(allocateBlock.getLeasing_time());
+			netconfPool.addAddressPoolEntries();
+			logger.info("Before editing config address-pools......");
+			session.editConfig(pools);
+			logger.info("After editing config address-pools......");
+		}
+		
+		logger.info("Before getting config address-pools......");
+		Element configuration = Client.getConfig(session.getConfig("address-pools"),"address-pools");
+		logger.info("After getting config address-pools with returned configuration");
+		
+		boolean matchPool = false;
+		boolean matchBlock = false;
+		
+		if (configuration.hasChildren()){
+			for (Element e :configuration.getChildren("address-pool")){
+				if (e.getValue("address-pool-name").toString().equals(allocateBlock.getAddress_pool_name())){
+					matchPool = true;
+					
+					if (e.getChild("address-pool-entries")!=null){
+						ElementChildrenIterator it = e.getChild("address-pool-entries").iterator();
+						while (it.hasNext()){
+							Element ite = it.next();
+							String blockId = "";
+							String blockName = "";
 							if (allocateBlock.getProtocol_type() == 0){
-								Element newel = e.getChild("address-pool-entries").createChild("ipv6-address-block");
-								setElementValue(newel,"ipv6-address-block-name",allocateBlock.getAddress_block_name());
-								setElementValue(newel,"ipv6-address-block-id",allocateBlock.getAddress_block_id());
-								setElementValue(newel,"ipv6-prefix",allocateBlock.getIp_prefix());
-								setElementValue(newel,"ipv6-prefix-length",allocateBlock.getIp_prefix_length());
-								setElementValue(newel,"time",allocateBlock.getTime());
+								if (ite.getValue("ipv6-address-block-id") != null){
+									blockId = ite.getValue("ipv6-address-block-id").toString();
+								}
+								if (ite.getValue("ipv6-address-block-name") != null){
+									blockName = ite.getValue("ipv6-address-block-name").toString();
+								}
 							}
 							else if (allocateBlock.getProtocol_type() == 1){
-								Element newel = e.getChild("address-pool-entries").createChild("ipv4-address-block");
-								setElementValue(newel,"ipv4-address-block-name",allocateBlock.getAddress_block_name());
-								setElementValue(newel,"ipv4-address-block-id",allocateBlock.getAddress_block_id());
-								setElementValue(newel,"ipv4-prefix",allocateBlock.getIp_prefix());
-								setElementValue(newel,"ipv4-prefix-length",allocateBlock.getIp_prefix_length());
-								setElementValue(newel,"time",allocateBlock.getTime());
+								if (ite.getValue("ipv4-address-block-id") != null){
+									blockId = ite.getValue("ipv4-address-block-id").toString();
+								}
+								if (ite.getValue("ipv4-address-block-name") != null){
+									blockName = ite.getValue("ipv4-address-block-name").toString();
+								}
+							}
+							if (String.valueOf(allocateBlock.getAddress_block_id()).equals(blockId)){
+								matchBlock = true;
+								allocateIndexRepeatList.add(allocateBlock.getAddress_block_id());
+								break;
+							}
+							if (allocateBlock.getAddress_block_name().equals(blockName)){
+								matchBlock = true;
+								allocateNameRepeatList.add(allocateBlock.getAddress_block_id());
+								break;
 							}
 						}
-						
 					}
+					
+					
+					if (!matchBlock){
+						if (e.getChild("address-pool-entries") == null){
+							e.createChild("address-pool-entries");
+						}
+						if (allocateBlock.getProtocol_type() == 0){
+							Element newel = e.getChild("address-pool-entries").createChild("ipv6-address-block");
+							setElementValue(newel,"ipv6-address-block-name",allocateBlock.getAddress_block_name());
+							setElementValue(newel,"ipv6-address-block-id",allocateBlock.getAddress_block_id());
+							setElementValue(newel,"ipv6-prefix",allocateBlock.getIp_prefix());
+							setElementValue(newel,"ipv6-prefix-length",allocateBlock.getIp_prefix_length());
+							setElementValue(newel,"time",allocateBlock.getTime());
+						}
+						else if (allocateBlock.getProtocol_type() == 1){
+							Element newel = e.getChild("address-pool-entries").createChild("ipv4-address-block");
+							setElementValue(newel,"ipv4-address-block-name",allocateBlock.getAddress_block_name());
+							setElementValue(newel,"ipv4-address-block-id",allocateBlock.getAddress_block_id());
+							setElementValue(newel,"ipv4-prefix",allocateBlock.getIp_prefix());
+							setElementValue(newel,"ipv4-prefix-length",allocateBlock.getIp_prefix_length());
+							setElementValue(newel,"time",allocateBlock.getTime());
+						}
+					}
+					
 				}
 			}
-			if (!matchPool){
-				Element newPool = configuration.createChild("address-pool");
-				setElementValue(newPool,"address-pool-name",allocateBlock.getAddress_pool_name());
-				setElementValue(newPool,"address-pool-id",allocateBlock.getAddress_pool_id());
-				setElementValue(newPool,"gwnetmask",allocateBlock.getGwnetmask());
-				setElementValue(newPool,"leasing-time",allocateBlock.getLeasing_time());
-				setElementValue(newPool,"domain-name",allocateBlock.getDomain_name());
-				
-				if (!StringUtils.isEmpty(allocateBlock.getPrimary_dns())){
-					setElementValue(newPool,"primarydns",allocateBlock.getPrimary_dns());
-				}
-				if (!StringUtils.isEmpty(allocateBlock.getSecondary_dns())){
-					setElementValue(newPool,"secondarydns",allocateBlock.getSecondary_dns());
-				}
-				
-				if (allocateBlock.getProtocol_type() == 0){
-					setElementValue(newPool,"ipv6-usergateway",allocateBlock.getUsergateway());
-					Element newel = newPool.createChild("address-pool-entries").createChild("ipv6-address-block");
-					setElementValue(newel,"ipv6-address-block-name",allocateBlock.getAddress_block_name());
-					setElementValue(newel,"ipv6-address-block-id",allocateBlock.getAddress_block_id());
-					setElementValue(newel,"ipv6-prefix",allocateBlock.getIp_prefix());
-					setElementValue(newel,"ipv6-prefix-length",allocateBlock.getIp_prefix_length());
-					setElementValue(newel,"time",allocateBlock.getTime());
-				}
-				else if (allocateBlock.getProtocol_type() == 1){
-					setElementValue(newPool,"ipv4-usergateway",allocateBlock.getUsergateway());
-					Element newel = newPool.createChild("address-pool-entries").createChild("ipv4-address-block");
-					setElementValue(newel,"ipv4-address-block-name",allocateBlock.getAddress_block_name());
-					setElementValue(newel,"ipv4-address-block-id",allocateBlock.getAddress_block_id());
-					setElementValue(newel,"ipv4-prefix",allocateBlock.getIp_prefix());
-					setElementValue(newel,"ipv4-prefix-length",allocateBlock.getIp_prefix_length());
-					setElementValue(newel,"time",allocateBlock.getTime());
-				}
+		}
+		if (!matchPool){
+			Element newPool = configuration.createChild("address-pool");
+			setElementValue(newPool,"address-pool-name",allocateBlock.getAddress_pool_name());
+			setElementValue(newPool,"address-pool-id",allocateBlock.getAddress_pool_id());
+			setElementValue(newPool,"gwnetmask",allocateBlock.getGwnetmask());
+			setElementValue(newPool,"leasing-time",allocateBlock.getLeasing_time());
+			setElementValue(newPool,"domain-name",allocateBlock.getDomain_name());
+			
+			if (!StringUtils.isEmpty(allocateBlock.getPrimary_dns())){
+				setElementValue(newPool,"primarydns",allocateBlock.getPrimary_dns());
+			}
+			if (!StringUtils.isEmpty(allocateBlock.getSecondary_dns())){
+				setElementValue(newPool,"secondarydns",allocateBlock.getSecondary_dns());
 			}
 			
-			setElementValue(configuration,"device-id",allocateBlock.getDevice_id());
-			//setElementValue(configuration,"domain-name",allocateBlock.getDomain_name());
-			//setElementValue(configuration,"time",allocateBlock.getTime());
+			if (allocateBlock.getProtocol_type() == 0){
+				setElementValue(newPool,"ipv6-usergateway",allocateBlock.getUsergateway());
+				Element newel = newPool.createChild("address-pool-entries").createChild("ipv6-address-block");
+				setElementValue(newel,"ipv6-address-block-name",allocateBlock.getAddress_block_name());
+				setElementValue(newel,"ipv6-address-block-id",allocateBlock.getAddress_block_id());
+				setElementValue(newel,"ipv6-prefix",allocateBlock.getIp_prefix());
+				setElementValue(newel,"ipv6-prefix-length",allocateBlock.getIp_prefix_length());
+				setElementValue(newel,"time",allocateBlock.getTime());
+			}
+			else if (allocateBlock.getProtocol_type() == 1){
+				setElementValue(newPool,"ipv4-usergateway",allocateBlock.getUsergateway());
+				Element newel = newPool.createChild("address-pool-entries").createChild("ipv4-address-block");
+				setElementValue(newel,"ipv4-address-block-name",allocateBlock.getAddress_block_name());
+				setElementValue(newel,"ipv4-address-block-id",allocateBlock.getAddress_block_id());
+				setElementValue(newel,"ipv4-prefix",allocateBlock.getIp_prefix());
+				setElementValue(newel,"ipv4-prefix-length",allocateBlock.getIp_prefix_length());
+				setElementValue(newel,"time",allocateBlock.getTime());
+			}
+		}
+		
+		setElementValue(configuration,"device-id",allocateBlock.getDevice_id());
+		try {
 			session.editConfig(configuration);
-		} catch (JNCException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("service.allocateAddress failed,caused by JNCException:"+e.getMessage());
-		} catch(IOException e) {
-		    e.printStackTrace();
-            logger.error("service.allocateAddress failed,caused by IOException:"+e.getMessage());
+			throw new Exception("Allocate Address failed." + "[Device Ip;pool id;block Id] is [" + allocateBlock.getDevice_ip() + "; "
+					+ allocateBlock.getAddress_pool_id() + "; " + allocateBlock.getAddress_block_id() + "].");
 		}
 		if (allocateIndexRepeatList.size() == 0 && allocateNameRepeatList.size() == 0){
 			return successResult;
@@ -399,7 +397,7 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
     }
 
 	@Override
-	public JSONObject recycleAddress(RecycleBlock recycleBlock,Map<Integer, com.chinatele.app.amctrl.rest.vo.request.Device> map) {
+	public JSONObject recycleAddress(RecycleBlock recycleBlock,Map<Integer, com.chinatele.app.amctrl.rest.vo.request.Device> map) throws Exception {
 		logger.info("enter method:recycleAddress");
 		
 		JSONObject successResult = new JSONObject();
@@ -485,9 +483,13 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 		catch (JNCException e) {
 			e.printStackTrace();
 			logger.error("service.recycleAddress failed,caused by JNCException:"+e.getMessage());
+			throw new Exception("Recycle Address failed." + "DeviceId;pool_id;blockId is " + recycleBlock.getDevice_id() + ";"
+					+ recycleBlock.getAddress_pool_id() + ";" + recycleBlock.getAddress_block_id());
 		} catch(IOException e) {
 		    e.printStackTrace();
             logger.error("service.recycleAddress failed,caused by IOException:"+e.getMessage());
+            throw new Exception("Recycle Address failed." + "DeviceId;pool_id;blockId is " +recycleBlock.getDevice_id() + ";"
+					+ recycleBlock.getAddress_pool_id() + ";" + recycleBlock.getAddress_block_id());
 		}
 		return successResult;
 	}

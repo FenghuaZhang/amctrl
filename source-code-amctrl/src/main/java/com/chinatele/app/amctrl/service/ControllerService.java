@@ -33,7 +33,7 @@ public interface ControllerService {
      * @param recycleBlock
      * @return
      */
-    public ResponseVo recycleAddress(RecycleBlock recycleBlock);
+    public ResponseVo recycleAddress(RecycleBlock recycleBlock) throws Exception;
 
     /**
      * @description 控制器连接设备的存活状态
@@ -51,7 +51,7 @@ public interface ControllerService {
      * @param allocateBlock
      * @return
      */
-    public ResponseVo allocateAddress(AllocateBlock allocateBlock);
+    public ResponseVo allocateAddress(AllocateBlock allocateBlock) throws Exception;
 
     /**
      * 
@@ -66,6 +66,7 @@ public interface ControllerService {
     public void clean();
     
     /**
+     * @deprecated
      * @description 释放地址池 
      * @author xiey
      * @param allocateBlock
