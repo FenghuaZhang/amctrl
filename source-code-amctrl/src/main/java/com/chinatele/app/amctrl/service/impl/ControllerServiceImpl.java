@@ -143,6 +143,8 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
 
         @Override
         public void run() {
+        	log.info("Start ControllerServiceImpl:ConfigThread::run() ...");
+        	long start = System.currentTimeMillis();
             for (Device device : configInfo.getDevice_list()) {
                 DeviceConfigInfo deviceConfigInfo = new DeviceConfigInfo();
                 deviceConfigInfo.setDevice_id(device.getDevice_id());
@@ -193,6 +195,7 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
                     }
                 }
             }
+            log.info("End ControllerServiceImpl:ConfigThread::run() with costed " + (System.currentTimeMillis()-start)	+ "millseconds");
         }
 
     }
@@ -728,14 +731,14 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
             		log.info("Device with deviceId " + deviceId + " is already alive.");
             		break;
             	} else if(Constants.DEVICE_STATE_CONNECTING == deviceState.getIsAlive()) {
-            		Thread.sleep(10);
+            		Thread.sleep(100);
             		count++;
             		log.info("Tryed " + count + " times for device " + deviceId);
             		if(count < 100) {
             			continue;            			
             		} else {
-            			log.error("Tryed 100 times to wait for device state to alive, but shows device " + deviceId+ " is still connecting.");
-            			throw new Exception("Tryed 100 times to wait for device state to alive, but shows device " + deviceId+ " is still connecting.");
+            			log.error("Tryed 100 times in totally 10s to wait for device state to alive, but shows device " + deviceId+ " is not alive.");
+            			throw new Exception("Tryed 100 times in totally 10s to wait for device state to alive, but shows device " + deviceId+ " is not alive.");
             		}
             	} else {
             		log.error("DeviceState " + deviceState.getIsAlive() + " of device with deviceId " + deviceId+ " is not expected.");

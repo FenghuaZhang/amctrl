@@ -94,9 +94,10 @@ public class Client {
             }
             
         	if (!dev.hasSession("msg")){
+        		long startConn = System.currentTimeMillis();
         		logger.info("Start connecting device " + ip + ":" + port + " with "+ emsUserName + "......");
         		dev.connect(emsUserName);
-        		logger.info("End connecting device");
+        		logger.info("End connecting device with costed " + (System.currentTimeMillis() - startConn) +"millseconds");
         		CertusnetIOSubscriber certusnetIOSubscriber = new CertusnetIOSubscriber("dev-"+ip,addressBlockMessageService,queueDestination);
         		logger.info("Start create new session with name msg");
         		dev.newSession(certusnetIOSubscriber,"msg");

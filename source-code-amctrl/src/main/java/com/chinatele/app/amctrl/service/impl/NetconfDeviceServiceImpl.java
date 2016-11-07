@@ -101,6 +101,7 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 	        NetconfSession session = client.getSession(Client.devices.get(connCfgInfo.getDevice_ip()),"cfg"); 
 	        
 	        logger.info("Starting ama netconf registration");
+	        long startAmaRegistration = System.currentTimeMillis();
 	        //用于Controller向AMA发起注册
 			if (session.getConfig("controller-netconf-registration") == null
 					|| session.getConfig("controller-netconf-registration").size() == 0) {
@@ -115,6 +116,7 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 	        	setElementValue(deviceConfig,"device-id",connCfgInfo.getDevice_id());
 		        session.editConfig(deviceConfig);
 	        }
+			logger.info("Ending ama netconf registration with costed " + (System.currentTimeMillis()-startAmaRegistration)	+ "millseconds");
 	        
 	        logger.info("Starting sending configuration to ama");
 	        //下发配置
@@ -131,7 +133,9 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 	        	if (session.getConfig().add(controllerSendConfigurationToAma)){
 	        		try {
 	        			logger.info("Start editting config controller-send-configuration-to-ama...");
+	        			long startSendConfig = System.currentTimeMillis();
 						session.editConfig(controllerSendConfigurationToAma);
+						logger.info("End editting config controller-send-configuration-to-ama with costed " + (System.currentTimeMillis()-startSendConfig)	+ "millseconds");
 					} catch (JNCException e) {
 						logger.error("Editting config controller-send-configuration-to-ama exception occurs: "+ e.getCause() + ";" + e.getMessage());
 						disconnectDevice(connCfgInfo.getDevice_ip());
@@ -148,7 +152,10 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 		        setElementValue(configuration,"ipv6-address-pool-usage-threshold", connCfgInfo.getIpv6_threshold());
 		        setElementValue(configuration,"state-update-interval", connCfgInfo.getState_update_interval());
 		        setElementValue(configuration,"device-sampling-interval", connCfgInfo.getDevice_sampling_interval());
+		        logger.info("Start editting config controller-send-configuration-to-ama...");
+		        long startSendConfig = System.currentTimeMillis();
 		        session.editConfig(configuration);
+				logger.info("End editting config controller-send-configuration-to-ama with costed " + (System.currentTimeMillis()-startSendConfig)	+ "millseconds");
 	        }
 	        
 	        return true;
@@ -374,7 +381,10 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 		
 		setElementValue(configuration,"device-id",allocateBlock.getDevice_id());
 		try {
+			logger.info("Start editConfig for device-id " + allocateBlock.getDevice_id());
+			long startEdit = System.currentTimeMillis();
 			session.editConfig(configuration);
+			logger.info("End editConfig for device-id "+ allocateBlock.getDevice_id() + " with costed " + (System.currentTimeMillis() - startEdit) +"millseconds");
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("service.allocateAddress failed,caused by JNCException:"+e.getMessage());
@@ -478,7 +488,10 @@ private static Logger logger = Logger.getLogger(NetconfDeviceServiceImpl.class);
 				failedResult.put(String.valueOf(Constants.RECYCLE_ADDRESS_NOT_EXIST), recyleNotExistList);
 				return failedResult;
 			}
+			logger.info("Start editConfig for device-ip " + device.getDevice_ip());
+			long startEdit = System.currentTimeMillis();
 			session.editConfig(configuration);
+			logger.info("End editConfig for device-ip " + device.getDevice_ip() + " with costed " + (System.currentTimeMillis() - startEdit) +"millseconds");
 		}
 		catch (JNCException e) {
 			e.printStackTrace();
