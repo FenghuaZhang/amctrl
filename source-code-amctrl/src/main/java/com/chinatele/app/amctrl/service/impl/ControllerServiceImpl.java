@@ -723,10 +723,10 @@ public class ControllerServiceImpl implements ControllerService, MessageListener
             
             // check device live state in case that device still connecting when device is invoked to alive first time
             log.info("ControllerServiceImpl::allocateAddress() Checking device alive state for device " + deviceId);
-            List<DeviceState> deviceStateList = deviceAliveStateMap.get(deviceId);
-            DeviceState deviceState = deviceStateList.get(deviceStateList.size()-1);
             int count = 0;
             while(true) {
+            	List<DeviceState> deviceStateList = deviceAliveStateMap.get(deviceId);
+            	DeviceState deviceState = deviceStateList.get(deviceStateList.size()-1);
             	if(Constants.DEVICE_STATE_ALIVE == deviceState.getIsAlive()) {
             		log.info("Device with deviceId " + deviceId + " is already alive.");
             		break;
