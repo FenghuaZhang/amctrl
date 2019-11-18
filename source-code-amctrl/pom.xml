@@ -40,7 +40,26 @@
             <artifactId>org.osgi.compendium</artifactId>
             <version>4.3.1</version>
         </dependency>
-        
+        <!-- https://mvnrepository.com/artifact/org.apache.axis/axis -->
+	<dependency>
+	    <groupId>org.apache.axis</groupId>
+	    <artifactId>axis</artifactId>
+	    <version>1.4</version>
+	</dependency>
+	    <!-- https://mvnrepository.com/artifact/org.apache.axis/axis-ant -->
+	<dependency>
+	    <groupId>org.apache.axis</groupId>
+	    <artifactId>axis-ant</artifactId>
+	    <version>1.4</version>
+	</dependency>
+
+	<!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+	<dependency>
+	    <groupId>com.alibaba</groupId>
+	    <artifactId>fastjson</artifactId>
+	    <version>1.2.50</version>
+	</dependency>
+
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-core</artifactId>
